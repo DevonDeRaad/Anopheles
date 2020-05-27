@@ -86,6 +86,7 @@ nrow(lfmm.temp.outliers) #check number of outliers
 #
 grid.arrange(plot1,plot2,plot3, nrow=3)
 ```
+
 #bayescenv manhattans
 ```{r}
 #bayescenv precip plot -log10(signficance vals) as manhattan plots
@@ -184,8 +185,6 @@ par(mfrow=c(3,3))
 #plot
 sig.pos<-as.vector(na.omit(lfmm.hum.corrs$id[abs(lfmm.hum.corrs$diff) < .05]))
 sig.pos<-sig.pos[1:27]
-j<-1 #initialize loop tracker
-pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
 for (i in sig.pos){
   frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
   frq2<-as.numeric(as.vector(phase2.all.freqs[phase2.all.freqs$id == i,3:23]))
@@ -193,8 +192,6 @@ for (i in sig.pos){
   abline(lm(frq~sort.pops.phase1$hannual))
   points(sort.pops.phase2$hannual,frq2, col="red")
   abline(lm(frq2~sort.pops.phase2$hannual), col="red")
-  setTxtProgressBar(pb, j)
-  j<-j+1
 }
 ```
 
@@ -203,8 +200,6 @@ par(mfrow=c(3,3))
 #plot
 sig.pos<-as.vector(na.omit(lfmm.hum.corrs$id[abs(lfmm.hum.corrs$diff) > .8]))
 sig.pos<-sig.pos[1:27]
-j<-1 #initialize loop tracker
-pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
 for (i in sig.pos){
   frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
   frq2<-as.numeric(as.vector(phase2.all.freqs[phase2.all.freqs$id == i,3:23]))
@@ -212,14 +207,11 @@ for (i in sig.pos){
   abline(lm(frq~sort.pops.phase1$hannual))
   points(sort.pops.phase2$hannual,frq2, col="red")
   abline(lm(frq2~sort.pops.phase2$hannual), col="red")
-  setTxtProgressBar(pb, j)
-  j<-j+1
 }
 ```
 
 #check out the correlations of allele frequency patterns with humidity
 ```{r}
-dev.off()
 #visualize
 plot(lfmm.hum.corrs$diff)
 abline(h=0, col="red")
@@ -231,7 +223,6 @@ plot(lfmm.hum.outliers$hum.fst, all.cases$diff)
 ```
 #different classes of relationships?
 ```{r}
-dev.off()
 layout(matrix(c(1,1,1,1,2,3,4,5),2, 4, byrow=TRUE))
 plot(lfmm.hum.corrs$phase1)
 abline(h=c(.4,.1,-.25), col="red")
@@ -250,8 +241,6 @@ par(mfrow=c(3,3))
 #plot
 sig.pos<-as.vector(lfmm.hum.corrs$id[lfmm.hum.corrs$phase1 > .4])
 sig.pos<-sample(sig.pos, size=27, replace = FALSE)
-j<-1 #initialize loop tracker
-pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
 for (i in sig.pos){
   frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
   frq2<-as.numeric(as.vector(phase2.all.freqs[phase2.all.freqs$id == i,3:23]))
@@ -259,8 +248,6 @@ for (i in sig.pos){
   abline(lm(frq~sort.pops.phase1$hannual))
   points(sort.pops.phase2$hannual,frq2, col="red")
   abline(lm(frq2~sort.pops.phase2$hannual), col="red")
-  setTxtProgressBar(pb, j)
-  j<-j+1
 }
 ```
 #weakly positive correlation
@@ -269,8 +256,6 @@ par(mfrow=c(3,3))
 #plot
 sig.pos<-as.vector(lfmm.hum.corrs$id[lfmm.hum.corrs$phase1 < .4 & lfmm.hum.corrs$phase1 > .1])
 sig.pos<-sample(sig.pos, size=27, replace = FALSE)
-j<-1 #initialize loop tracker
-pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
 for (i in sig.pos){
   frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
   frq2<-as.numeric(as.vector(phase2.all.freqs[phase2.all.freqs$id == i,3:23]))
@@ -278,8 +263,6 @@ for (i in sig.pos){
   abline(lm(frq~sort.pops.phase1$hannual))
   points(sort.pops.phase2$hannual,frq2, col="red")
   abline(lm(frq2~sort.pops.phase2$hannual), col="red")
-  setTxtProgressBar(pb, j)
-  j<-j+1
 }
 ```
 #weakly negative correlation
@@ -288,8 +271,6 @@ par(mfrow=c(3,3))
 #plot
 sig.pos<-as.vector(lfmm.hum.corrs$id[lfmm.hum.corrs$phase1 < .1 & lfmm.hum.corrs$phase1 > -.25])
 sig.pos<-sample(sig.pos, size=27, replace = FALSE)
-j<-1 #initialize loop tracker
-pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
 for (i in sig.pos){
   frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
   frq2<-as.numeric(as.vector(phase2.all.freqs[phase2.all.freqs$id == i,3:23]))
@@ -297,8 +278,6 @@ for (i in sig.pos){
   abline(lm(frq~sort.pops.phase1$hannual))
   points(sort.pops.phase2$hannual,frq2, col="red")
   abline(lm(frq2~sort.pops.phase2$hannual), col="red")
-  setTxtProgressBar(pb, j)
-  j<-j+1
 }
 ```
 #strongly negative correlation
@@ -307,8 +286,6 @@ par(mfrow=c(3,3))
 #plot
 sig.pos<-as.vector(lfmm.hum.corrs$id[lfmm.hum.corrs$phase1 < -.25])
 sig.pos<-sample(sig.pos, size=27, replace = FALSE)
-j<-1 #initialize loop tracker
-pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
 for (i in sig.pos){
   frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
   frq2<-as.numeric(as.vector(phase2.all.freqs[phase2.all.freqs$id == i,3:23]))
@@ -316,8 +293,6 @@ for (i in sig.pos){
   abline(lm(frq~sort.pops.phase1$hannual))
   points(sort.pops.phase2$hannual,frq2, col="red")
   abline(lm(frq2~sort.pops.phase2$hannual), col="red")
-  setTxtProgressBar(pb, j)
-  j<-j+1
 }
 ```
 
