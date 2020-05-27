@@ -1,0 +1,327 @@
+---
+title: "May27"
+author: "Devon DeRaad"
+date: "5/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#May 17 2020
+#plot results from phase1 and verify with phase2 allele freq patterns
+#devtools::install_github('exaexa/scattermore')
+library(scattermore)
+library(gridExtra)
+library(VennDiagram)
+library(qvalue)
+library(ggplot2)
+
+```
+
+#convert p values to qvalues
+```{r cars}
+#read in all phase1 significance values:
+all.sigs<-read.csv(file="~/Desktop/anoph.3.march.2020/all.sigs.csv")
+table(all.sigs$chrom)
+
+#convert 0 bayescenv q-vals to 1e-4, to avoid infinite values when plotting with -log10()
+all.sigs$prec.q[all.sigs$prec.q == 0]<-.0001
+all.sigs$temp.q[all.sigs$temp.q == 0]<-.0001
+all.sigs$hum.q[all.sigs$hum.q == 0]<-.0001
+
+#convert lfmm prec p values to genome-wide FDR adjusted q values
+for (i in levels(all.sigs$chrom)){
+qvals<-qvalue(all.sigs$prec.p[all.sigs$chrom== i])
+all.sigs$prec.p[all.sigs$chrom== i]<-qvals[["qvalues"]]
+}
+#convert lfmm hum p values to genome-wide FDR adjusted q values
+for (i in levels(all.sigs$chrom)){
+  qvals<-qvalue(all.sigs$hum.p[all.sigs$chrom== i])
+  all.sigs$hum.p[all.sigs$chrom== i]<-qvals[["qvalues"]]
+}
+#convert lfmm temp p values to genome-wide FDR adjusted q values
+for (i in levels(all.sigs$chrom)){
+  qvals<-qvalue(all.sigs$temp.p[all.sigs$chrom== i])
+  all.sigs$temp.p[all.sigs$chrom== i]<-qvals[["qvalues"]]
+}
+rm(qvals) #space saver
+
+#give order for plotting manhattan plots
+all.sigs$order<-c(all.sigs$pos[all.sigs$chrom== "2R"],
+                  all.sigs$pos[all.sigs$chrom== "2L"]+61545105,
+                  all.sigs$pos[all.sigs$chrom== "3R"]+61545105+49364325,
+                  all.sigs$pos[all.sigs$chrom== "3L"]+61545105+49364325+53200684,
+                  all.sigs$pos[all.sigs$chrom== "X"]+61545105+49364325+53200684+41963435)
+
+```
+
+#lfmm manhattans
+```{r}
+#LFMM precip plot -log10(signficance vals) as manhattan plots
+plot1<-ggplot(data=all.sigs, aes(x=order, y=-log10(prec.p), col = chrom))+
+  geom_scattermore(pointsize = 1.2)+
+  theme(panel.grid=element_blank(), panel.background=element_blank())+
+  geom_hline(yintercept=-log10(.01), linetype="dashed")
+#pull all significant precip outliers
+lfmm.prec.outliers<- all.sigs[all.sigs$prec.p < .01,]
+nrow(lfmm.prec.outliers) #check number of outliers
+
+#LFMM hum plot -log10(signficance vals) as manhattan plots
+plot2<-ggplot(data=all.sigs, aes(x=order, y=-log10(hum.p), col = chrom))+
+  geom_scattermore(pointsize = 1.2)+
+  theme(panel.grid=element_blank(), panel.background=element_blank())+
+  geom_hline(yintercept=-log10(.01), linetype="dashed")
+#pull all significant precip outliers
+lfmm.hum.outliers<- all.sigs[all.sigs$hum.p < .01,]
+nrow(lfmm.hum.outliers) #check number of outliers
+
+#LFMM temp plot -log10(signficance vals) as manhattan plots
+plot3<-ggplot(data=all.sigs, aes(x=order, y=-log10(temp.p), col = chrom))+
+  geom_scattermore(pointsize = 1.2)+
+  theme(panel.grid=element_blank(), panel.background=element_blank())+
+  geom_hline(yintercept=-log10(.01), linetype="dashed")
+#pull all significant precip outliers
+lfmm.temp.outliers<- all.sigs[all.sigs$temp.p < .01,]
+nrow(lfmm.temp.outliers) #check number of outliers
+
+#
+grid.arrange(plot1,plot2,plot3, nrow=3)
+```
+#bayescenv manhattans
+```{r}
+#bayescenv precip plot -log10(signficance vals) as manhattan plots
+plot1<-ggplot(data=all.sigs, aes(x=order, y=-log10(prec.q), col = chrom))+
+  geom_scattermore(pointsize = 1.2)+
+  theme(panel.grid=element_blank(), panel.background=element_blank())+
+  geom_hline(yintercept=-log10(.01), linetype="dashed")
+#pull all significant precip outliers
+baye.prec.outliers<- all.sigs[all.sigs$prec.q < .01,]
+nrow(baye.prec.outliers) #check number of outliers
+
+#bayescenv hum plot -log10(signficance vals) as manhattan plots
+plot2<-ggplot(data=all.sigs, aes(x=order, y=-log10(hum.q), col = chrom))+
+  geom_scattermore(pointsize = 1.2)+
+  theme(panel.grid=element_blank(), panel.background=element_blank())+
+  geom_hline(yintercept=-log10(.01), linetype="dashed")
+#pull all significant hum outliers
+baye.hum.outliers<- all.sigs[all.sigs$hum.q < .01,]
+nrow(baye.hum.outliers) #check number of outliers
+
+#bayescenv temp plot -log10(signficance vals) as manhattan plots
+plot3<-ggplot(data=all.sigs, aes(x=order, y=-log10(temp.q), col = chrom))+
+  geom_scattermore(pointsize = 1.2)+
+  theme(panel.grid=element_blank(), panel.background=element_blank())+
+  geom_hline(yintercept=-log10(.01), linetype="dashed")
+#pull all significant temp outliers
+baye.temp.outliers<- all.sigs[all.sigs$temp.q < .01,]
+nrow(baye.temp.outliers) #check number of outliers
+
+grid.arrange(plot1,plot2,plot3, nrow=3)
+
+```
+
+
+```{r, include=FALSE}
+#bring in phase1 allele frequencies
+phase1.all.freqs<-read.csv(file = "~/Desktop/anoph.3.march.2020/phase1.all.freqs.csv")
+#make column for id
+phase1.all.freqs$id<-paste(phase1.all.freqs$chrom,phase1.all.freqs$POS)
+
+#bring in phase2 allele frequencies
+phase2.all.freqs<-read.csv(file = "~/Desktop/anoph.phase2/phase2.all.freqs.csv")
+#make id column
+phase2.all.freqs$id<-paste(phase2.all.freqs$chrom,phase2.all.freqs$POS)
+
+#bring in dataframe with locality and environmental data for each individual phase1
+phase1.alldata<-read.csv(file = "~/Desktop/anoph.3.march.2020/phase1.allvariables.csv")
+#subset to only the variables we need (lat,long,hum,temp,precip)
+meta<-phase1.alldata[,c(16,17,18,20,22)]
+#subset only the unique lat/longs
+metapops<-unique(meta)
+#sort by latitude to match the order of the allele frequency files
+sort.pops.phase1 <-metapops[order(metapops$latitude),]
+
+#bring in dataframe with locality and environmental data for each individual phase2
+phase2.alldata<-read.csv(file = "~/Downloads/phase2_localities_all_vairables.csv")
+#subset to only the variables we need (lat,long,hum,temp,precip)
+meta<-phase2.alldata[,c(2,3,4,6,8)]
+#subset only the unique lat/longs
+metapops<-unique(meta)
+#sort by latitude to match the order of the allele frequency files
+sort.pops.phase2 <-metapops[order(metapops$latitude),]
+```
+
+```{r, include=FALSE}
+sig.pos<-paste(lfmm.hum.outliers$chrom,lfmm.hum.outliers$pos)
+phase1.all.freqs.lfmm.hum <- phase1.all.freqs[phase1.all.freqs$id %in% sig.pos,]
+phase2.all.freqs.lfmm.hum <- phase2.all.freqs[phase2.all.freqs$id %in% sig.pos,]
+#build correlation dataframe
+cor.frame<-data.frame(matrix(, nrow=0, ncol=3)) #init df
+j<-1 #initialize loop tracker
+pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
+for (i in sig.pos){
+  frq<-as.numeric(as.vector(phase1.all.freqs.lfmm.hum[phase1.all.freqs.lfmm.hum$id == i,3:16]))
+  frq2<-as.numeric(as.vector(phase2.all.freqs.lfmm.hum[phase2.all.freqs.lfmm.hum$id == i,3:23]))
+  cor1<-cor(sort.pops.phase1$hannual,frq)
+  cor2<-cor(sort.pops.phase2$hannual,frq2)
+  cor.frame<-rbind(cor.frame, cbind(i,cor1,cor2))
+  
+  setTxtProgressBar(pb, j)
+  j<-j+1
+}
+#fix df
+colnames(cor.frame)<-c("id","phase1","phase2")
+lfmm.hum.corrs<-cor.frame
+lfmm.hum.corrs$phase1<-as.numeric(as.character(lfmm.hum.corrs$phase1))
+lfmm.hum.corrs$phase2<-as.numeric(as.character(lfmm.hum.corrs$phase2))
+lfmm.hum.corrs$diff<-(lfmm.hum.corrs$phase1-lfmm.hum.corrs$phase2)
+all.cases<-lfmm.hum.corrs
+lfmm.hum.corrs<-lfmm.hum.corrs[complete.cases(lfmm.hum.corrs), ]
+```
+
+
+```{r}
+par(mfrow=c(3,3))
+#plot
+sig.pos<-as.vector(na.omit(lfmm.hum.corrs$id[abs(lfmm.hum.corrs$diff) < .05]))
+sig.pos<-sig.pos[1:27]
+j<-1 #initialize loop tracker
+pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
+for (i in sig.pos){
+  frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
+  frq2<-as.numeric(as.vector(phase2.all.freqs[phase2.all.freqs$id == i,3:23]))
+  plot(sort.pops.phase1$hannual,frq, main = i, ylim =c(0,1))
+  abline(lm(frq~sort.pops.phase1$hannual))
+  points(sort.pops.phase2$hannual,frq2, col="red")
+  abline(lm(frq2~sort.pops.phase2$hannual), col="red")
+  setTxtProgressBar(pb, j)
+  j<-j+1
+}
+```
+
+```{r}
+par(mfrow=c(3,3))
+#plot
+sig.pos<-as.vector(na.omit(lfmm.hum.corrs$id[abs(lfmm.hum.corrs$diff) > .8]))
+sig.pos<-sig.pos[1:27]
+j<-1 #initialize loop tracker
+pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
+for (i in sig.pos){
+  frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
+  frq2<-as.numeric(as.vector(phase2.all.freqs[phase2.all.freqs$id == i,3:23]))
+  plot(sort.pops.phase1$hannual,frq, main = i, ylim =c(0,1))
+  abline(lm(frq~sort.pops.phase1$hannual))
+  points(sort.pops.phase2$hannual,frq2, col="red")
+  abline(lm(frq2~sort.pops.phase2$hannual), col="red")
+  setTxtProgressBar(pb, j)
+  j<-j+1
+}
+```
+
+#check out the correlations of allele frequency patterns with humidity
+```{r}
+dev.off()
+#visualize
+plot(lfmm.hum.corrs$diff)
+abline(h=0, col="red")
+plot(lfmm.hum.corrs$phase1, lfmm.hum.corrs$phase2)
+hist(lfmm.hum.corrs$diff)
+plot(-log10(lfmm.hum.outliers$hum.p), all.cases$diff)
+plot(-log10(lfmm.hum.outliers$hum.q), all.cases$diff)
+plot(lfmm.hum.outliers$hum.fst, all.cases$diff)
+```
+#different classes of relationships?
+```{r}
+dev.off()
+layout(matrix(c(1,1,1,1,2,3,4,5),2, 4, byrow=TRUE))
+plot(lfmm.hum.corrs$phase1)
+abline(h=c(.4,.1,-.25), col="red")
+hist(lfmm.hum.corrs$diff[lfmm.hum.corrs$phase1 > .4])
+abline(v=c(-.2,.2), col="red")
+hist(lfmm.hum.corrs$diff[lfmm.hum.corrs$phase1 < .4 & lfmm.hum.corrs$phase1 > .1])
+abline(v=c(-.2,.2), col="red")
+hist(lfmm.hum.corrs$diff[lfmm.hum.corrs$phase1 < .1 & lfmm.hum.corrs$phase1 > -.25])
+abline(v=c(-.2,.2), col="red")
+hist(lfmm.hum.corrs$diff[lfmm.hum.corrs$phase1 < -.25])
+abline(v=c(-.2,.2), col="red")
+```
+#strongly positive correlation
+```{r}
+par(mfrow=c(3,3))
+#plot
+sig.pos<-as.vector(lfmm.hum.corrs$id[lfmm.hum.corrs$phase1 > .4])
+sig.pos<-sample(sig.pos, size=27, replace = FALSE)
+j<-1 #initialize loop tracker
+pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
+for (i in sig.pos){
+  frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
+  frq2<-as.numeric(as.vector(phase2.all.freqs[phase2.all.freqs$id == i,3:23]))
+  plot(sort.pops.phase1$hannual,frq, main = i, ylim =c(0,1))
+  abline(lm(frq~sort.pops.phase1$hannual))
+  points(sort.pops.phase2$hannual,frq2, col="red")
+  abline(lm(frq2~sort.pops.phase2$hannual), col="red")
+  setTxtProgressBar(pb, j)
+  j<-j+1
+}
+```
+#weakly positive correlation
+```{r}
+par(mfrow=c(3,3))
+#plot
+sig.pos<-as.vector(lfmm.hum.corrs$id[lfmm.hum.corrs$phase1 < .4 & lfmm.hum.corrs$phase1 > .1])
+sig.pos<-sample(sig.pos, size=27, replace = FALSE)
+j<-1 #initialize loop tracker
+pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
+for (i in sig.pos){
+  frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
+  frq2<-as.numeric(as.vector(phase2.all.freqs[phase2.all.freqs$id == i,3:23]))
+  plot(sort.pops.phase1$hannual,frq, main = i, ylim =c(0,1))
+  abline(lm(frq~sort.pops.phase1$hannual))
+  points(sort.pops.phase2$hannual,frq2, col="red")
+  abline(lm(frq2~sort.pops.phase2$hannual), col="red")
+  setTxtProgressBar(pb, j)
+  j<-j+1
+}
+```
+#weakly negative correlation
+```{r}
+par(mfrow=c(3,3))
+#plot
+sig.pos<-as.vector(lfmm.hum.corrs$id[lfmm.hum.corrs$phase1 < .1 & lfmm.hum.corrs$phase1 > -.25])
+sig.pos<-sample(sig.pos, size=27, replace = FALSE)
+j<-1 #initialize loop tracker
+pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
+for (i in sig.pos){
+  frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
+  frq2<-as.numeric(as.vector(phase2.all.freqs[phase2.all.freqs$id == i,3:23]))
+  plot(sort.pops.phase1$hannual,frq, main = i, ylim =c(0,1))
+  abline(lm(frq~sort.pops.phase1$hannual))
+  points(sort.pops.phase2$hannual,frq2, col="red")
+  abline(lm(frq2~sort.pops.phase2$hannual), col="red")
+  setTxtProgressBar(pb, j)
+  j<-j+1
+}
+```
+#strongly negative correlation
+```{r}
+par(mfrow=c(3,3))
+#plot
+sig.pos<-as.vector(lfmm.hum.corrs$id[lfmm.hum.corrs$phase1 < -.25])
+sig.pos<-sample(sig.pos, size=27, replace = FALSE)
+j<-1 #initialize loop tracker
+pb <- txtProgressBar(min = 0, max = length(sig.pos), style = 3) #initialize progress bar
+for (i in sig.pos){
+  frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
+  frq2<-as.numeric(as.vector(phase2.all.freqs[phase2.all.freqs$id == i,3:23]))
+  plot(sort.pops.phase1$hannual,frq, main = i, ylim =c(0,1))
+  abline(lm(frq~sort.pops.phase1$hannual))
+  points(sort.pops.phase2$hannual,frq2, col="red")
+  abline(lm(frq2~sort.pops.phase2$hannual), col="red")
+  setTxtProgressBar(pb, j)
+  j<-j+1
+}
+```
+
+
+
+
+
