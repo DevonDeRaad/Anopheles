@@ -1,0 +1,1 @@
+After running lfmm and bayescenv with 3 variables each, then separating environmental from local SNPS, then vetting each category with Phase2 data, we visualize our confidently identified and categorized SNPs.
