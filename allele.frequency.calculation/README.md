@@ -1,0 +1,1 @@
+Frequency of the alternate allele was calculated from the SNP matrix for each unique geographic pop in phase1. Phase2 some geographically proximate sampling locs collapsed to generate large enough sample size for accurate allele frequency estimates.
