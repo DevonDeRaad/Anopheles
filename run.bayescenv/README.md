@@ -1,1 +1,1 @@
-Scripts to 1) Z transform input environmental variables in R 2) convert .vcf to SNP matrix in vcftools 3) custom R script to convert vcftools binary SNP matrix into a correctly formatted .geste and 4) run bayescenv with geste and environmental input files.
+Scripts to 1) convert .vcf to SNP matrix in vcftools 2) Z transform input environmental variables in R 3) custom R script to convert vcftools binary SNP matrix into a correctly formatted .geste and 4) run bayescenv with geste and environmental input files.
