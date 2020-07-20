@@ -1,0 +1,59 @@
+#this script will combine the output files from bayescan into a single file for each variable
+#
+
+2r
+2l
+3r
+3l
+x
+
+#build this file to match ordering of marlon's file
+awk '{$9="2R"}1' 2R.temp_fst.txt > temp.baye.txt
+awk 'FNR == 1 {next}{$9="2L"}1' 2L.temp_fst.txt >> temp.baye.txt
+awk 'FNR == 1 {next}{$9="3R"}1' 3Rtemp_fst.txt >> temp.baye.txt
+awk 'FNR == 1 {next}{$9="3L"}1' 3Ltemp_fst.txt >> temp.baye.txt
+awk 'FNR == 1 {next}{$9="X"}1' X.temp_fst.txt >> temp.baye.txt
+
+#build this file to match ordering of marlon's file
+awk '{$9="2R"}1' 2R.precip_fst.txt > precip.baye.txt
+awk 'FNR == 1 {next}{$9="2L"}1' 2L.precip_fst.txt >> precip.baye.txt
+awk 'FNR == 1 {next}{$9="3R"}1' 3R.precip_fst.txt >> precip.baye.txt
+awk 'FNR == 1 {next}{$9="3L"}1' 3L.precip_fst.txt >> precip.baye.txt
+awk 'FNR == 1 {next}{$9="X"}1' X.precip_fst.txt >> precip.baye.txt
+
+#build this file to match ordering of marlon's file
+awk '{$9="2R"}1' 2R.hum_fst.txt > hum.baye.txt
+awk 'FNR == 1 {next}{$9="2L"}1' 2L.hum_fst.txt >> hum.baye.txt
+awk 'FNR == 1 {next}{$9="3R"}1' 3R.hum_fst.txt >> hum.baye.txt
+awk 'FNR == 1 {next}{$9="3L"}1' 3L.hum_fst.txt >> hum.baye.txt
+awk 'FNR == 1 {next}{$9="X"}1' X.hum_fst.txt >> hum.baye.txt
+
+
+
+#these were all attempts to then combine these files, which was abandoned
+#final solution was reading them into R, and creating 'all.sigs.csv' which contains all significance values for phase1
+
+#cut out pvalue and paste it into new file
+paste <(cut -d' ' -f3 temp.baye.txt) <(cut -d' ' -f3 hum.baye.txt) <(cut -d' ' -f3 precip.baye.txt) > qvals
+
+
+#convert to csv
+sed 's/ /","/g' temp.baye.txt > temp.baye.csv
+sed -i 's/.*/"&"/' temp.baye.csv
+
+#cut out pvalue and paste it into new file
+cut -d' ' -f3 temp.baye.txt > qvals
+
+cut -d, -f4,7,10 ~/Downloads/Whole_genome_LFMM.csv > ~/Downloads/LFMM.pvals.csv
+paste -d',' temp.qval ~/Downloads/LFMM.pvals.csv
+
+#convert to csv
+sed 's/" "/","/g' qvals > qvals
+sed -i 's/.*/"&"/' qvals
+
+paste <(cut -d, -f2,3,4,7,10 ~/Downloads/Whole_genome_LFMM.csv) <(cut -d' ' -f1,2,3 qvals) > sig.vals.txt
+
+
+
+
+
