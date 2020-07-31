@@ -1,3 +1,12 @@
+#I renamed each geste file according to the following conventions to fit the 'array' variable 1-5
+#2R.geste.txt > 1.geste.txt
+#2L.geste.txt > 2.geste.txt
+#3R.geste.txt > 3.geste.txt
+#3L.geste.txt > 4.geste.txt
+#X.geste.txt > 5.geste.txt
+
+#I then ran an array for each environmental variable, across all 5 chromosome arms on the KUHPC with following job settings and local bayescenv executable:
+
 #!/bin/sh
 #
 #SBATCH --job-name=bayescenv.anopheles.temp             # Job Name
