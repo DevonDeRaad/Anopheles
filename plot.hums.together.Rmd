@@ -126,7 +126,7 @@ r2.hum<-ggplot(df, aes(x = BPcum, y = min.rel.vim, color = as.factor(chrom), siz
   geom_point(alpha = 0.75) +
   geom_hline(yintercept = 1, color = "grey40", linetype = "dashed") + 
   scale_x_continuous(label = axis.set$chrom, breaks = axis.set$center) +
-  scale_y_continuous(expand = c(0,0), limits = c(0, ylim)) +
+  scale_y_sqrt()+
   scale_color_manual(values = c("#276FBF", "#183059","#276FBF","#183059","#183059")) +
   scale_size_continuous(range = c(.1,.5)) +
   labs(x = NULL, 
