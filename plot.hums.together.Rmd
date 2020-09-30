@@ -1,0 +1,243 @@
+---
+title: "Untitled"
+author: "Devon DeRaad"
+date: "9/29/2020"
+output: html_document
+---
+
+```{r}
+library(qvalue)
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(VennDiagram)
+
+#read in bayescan qvals
+bayescan<-read.csv("~/Desktop/anoph.phase2/bayescenv.results/baye.qvalues.output.csv")
+bayescan[1:10,]
+table(bayescan$temp.q)[1:10]
+#convert 0 qvals to 2e-05
+bayescan[bayescan == 0]<-2e-05
+table(bayescan$temp.q)[1:10]
+
+#read in lfmm pvals
+lfmm<-read.csv("~/Desktop/anoph.phase2/lfmm/whole_genome_LFMM_pvalues.csv")
+lfmm[1:10,]
+
+#convert lfmm p values to q values
+#visual inspection to make sure this is working the way we hope
+q<-qvalue(lfmm$p_value_pannual)
+hist(lfmm$p_value_pannual)
+hist(lfmm$p_value_pannual[lfmm$p_value_pannual < .01])
+hist(q$qvalues)
+hist(q$qvalues[q$qvalues < .01])
+
+#looks good
+pannual<-qvalue(lfmm$p_value_pannual)
+hannual<-qvalue(lfmm$p_value_hannual)
+tmean<-qvalue(lfmm$p_value_tmean)
+
+#convert
+lfmm$p_value_pannual<-pannual$qvalues
+lfmm$p_value_hannual<-hannual$qvalues
+lfmm$p_value_tmean<-tmean$qvalues
+
+colnames(lfmm)[1:2]<-c("chrom","pos")
+lfmm[1:10,]
+
+#read in r2vim hum
+hum<-read.csv("~/Desktop/anoph.phase2/r2vim/hum.r2vim.csv")
+
+#match column name
+colnames(hum)[2]<-"pos"
+#merge
+df<-merge(bayescan, lfmm, by=c("chrom","pos"))
+df<-merge(df, hum, by=c("chrom","pos"))
+#subset to only hum values
+df<-df[,c(1,2,4,7,9)]
+
+#make BPcum
+nCHR <- length(unique(df$chrom))
+df$BPcum <- NA
+s <- 0
+nbp <- c()
+for (i in c("2R","2L","3R","3L","X")){
+  nbp[i] <- max(df[df$chrom == i,]$pos)
+  df[df$chrom == i,"BPcum"] <- df[df$chrom == i,"pos"] + s
+  s <- s + nbp[i]
+}
+
+```
+
+```{r}
+#check df
+df[1:10,]
+
+#set plotting params
+axis.set <- df %>% 
+  group_by(chrom) %>% 
+  summarize(center = (max(BPcum) + min(BPcum)) / 2)
+sig <- .01
+
+#plot lfmm hum
+ylim <- abs(floor(log10(min(df$p_value_hannual)))) + 2 
+#ggplot lfmm hum
+lfmm.hum<-ggplot(df, aes(x = BPcum, y = -log10(p_value_hannual), color = as.factor(chrom), size = -log10(p_value_hannual))) +
+  geom_point(alpha = 0.75) +
+  geom_hline(yintercept = -log10(sig), color = "grey40", linetype = "dashed") + 
+  scale_x_continuous(label = axis.set$chrom, breaks = axis.set$center) +
+  scale_y_continuous(expand = c(0,0), limits = c(0, ylim)) +
+  scale_color_manual(values = c("#276FBF", "#183059","#276FBF","#183059","#183059")) +
+  scale_size_continuous(range = c(.1,.5)) +
+  labs(x = NULL, 
+       y = "-log10(p)") + 
+  theme_minimal() +
+  theme( 
+    legend.position = "none",
+    panel.border = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.text.x = element_text(size = 8, vjust = 0.5))+
+  ggtitle("LFMM humidity")
+
+ylim <- abs(floor(log10(min(df$hum.q)))) + 2 
+#ggplot baye hum
+baye.hum<-ggplot(df, aes(x = BPcum, y = -log10(hum.q), color = as.factor(chrom), size = -log10(hum.q))) +
+  geom_point(alpha = 0.75) +
+  geom_hline(yintercept = -log10(sig), color = "grey40", linetype = "dashed") + 
+  scale_x_continuous(label = axis.set$chrom, breaks = axis.set$center) +
+  scale_y_continuous(expand = c(0,0), limits = c(0, ylim)) +
+  scale_color_manual(values = c("#276FBF", "#183059","#276FBF","#183059","#183059")) +
+  scale_size_continuous(range = c(.1,.5)) +
+  labs(x = NULL, 
+       y = "-log10(p)") + 
+  theme_minimal() +
+  theme( 
+    legend.position = "none",
+    panel.border = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.text.x = element_text(size = 8, vjust = 0.5))+
+  ggtitle("BayeScEnv humidity")
+
+ylim <- max(df$min.rel.vim) + 2 
+#ggplot r2vim hum
+r2.hum<-ggplot(df, aes(x = BPcum, y = min.rel.vim, color = as.factor(chrom), size = min.rel.vim)) +
+  geom_point(alpha = 0.75) +
+  geom_hline(yintercept = 1, color = "grey40", linetype = "dashed") + 
+  scale_x_continuous(label = axis.set$chrom, breaks = axis.set$center) +
+  scale_y_continuous(expand = c(0,0), limits = c(0, ylim)) +
+  scale_color_manual(values = c("#276FBF", "#183059","#276FBF","#183059","#183059")) +
+  scale_size_continuous(range = c(.1,.5)) +
+  labs(x = NULL, 
+       y = "min.rel.vim") + 
+  theme_minimal() +
+  theme( 
+    legend.position = "none",
+    panel.border = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.text.x = element_text(size = 8, vjust = 0.5))+
+  ggtitle("r2vim humidity")
+
+
+grid.arrange(lfmm.hum,baye.hum,r2.hum, nrow=3)
+
+#ggsave("~/Downloads/humidity.g.png", hum, width = 8.5, height = 4, units = "in")
+
+```
+
+```{r}
+#make chrompos column
+df$chrompos<-paste(df$chrom,df$pos)
+
+#venn diagram of overlap between methods in sig associated snps
+venn.diagram(x = list(df$chrompos[df$min.rel.vim >= 1],
+                      df$chrompos[-log10(df$hum.q) >= 2],
+                      df$chrompos[-log10(df$p_value_hannual) >= 2]),
+             category.names = c("r2vim", "bayescenv", "lfmm"),
+             main = "Hum SNP overlap",
+             imagetype = "png",
+             filename = "~/Downloads/hum.venn.png")
+
+#show venn
+knitr::include_graphics(c("/Users/devder/Downloads/hum.venn.png"))
+```
+
+```{r}
+#look at the significant outliers found by r2vim to see whether single pop outliers confounded this method too?
+hum.sig<-df[df$min.rel.vim >= 1,c(1,2,5,7)]
+
+#read in allele freqs
+phase1.all.freqs<-read.csv(file = "~/Desktop/anoph.3.march.2020/phase1.all.freqs.csv")
+#make column for id
+phase1.all.freqs$id<-paste(phase1.all.freqs$chrom,phase1.all.freqs$POS)
+#bring in dataframe with locality and environmental data for each individual phase1
+phase1.alldata<-read.csv(file = "~/Desktop/anoph.3.march.2020/phase1.allvariables.csv")
+#subset to only the variables we need (lat,long,hum,temp,precip)
+meta<-phase1.alldata[,c("latitude","longitude","hannual","pannual","tmean")]
+#subset only the unique lat/longs
+metapops<-unique(meta)
+#sort by latitude to match the order of the allele frequency files
+sort.pops.phase1 <-metapops[order(metapops$latitude),]
+#pull all significant r2vim hum outliers
+head(hum.sig)
+#generate matching id's for the outlier dataset in question
+sig.pos<-hum.sig$chrompos
+#subset all AF values to only the outlier dataset, to save time rather than searching the entire 3M snp dataset
+phase1.all.freqs.hum <- phase1.all.freqs[phase1.all.freqs$id %in% sig.pos,]
+
+#plot the relationship between humidity and allele freq for each outlier
+par(mfrow=c(3,3))
+#plot first 100
+sig.pos<-phase1.all.freqs.hum$id[1:100]
+for (i in sig.pos){
+  frq<-as.numeric(as.vector(phase1.all.freqs[phase1.all.freqs$id == i,3:16]))
+  plot(sort.pops.phase1$hannual,frq, main = i, ylim =c(0,1))
+  abline(lm(frq~sort.pops.phase1$hannual))
+}
+```
+
+```{r}
+#calc outlier value for r2vim
+cor.frame<-data.frame(matrix(, nrow=0, ncol=2)) #init df
+for (i in sig.pos){
+  frq<-as.numeric(as.vector(phase1.all.freqs.hum[phase1.all.freqs.hum$id == i,3:16]))
+  mod<-summary(lm(frq ~ sort.pops.phase1$hannual)) #perform linear reg
+  # store 9 values describing the correlation to feed into machine learning
+  cor.frame<-rbind(cor.frame, cbind(i,
+                                    sort(abs(frq-mean(frq)))[14]-sort(abs(frq-mean(frq)))[13]
+  )
+  )
+}
+
+#store
+r2vim.outliers<-as.numeric(as.character(cor.frame[,2]))
+
+#subset sig.pos for lfmm
+sig.pos<- df$chrompos[df$hum.q <= .01]
+phase1.all.freqs.hum <- phase1.all.freqs[phase1.all.freqs$id %in% sig.pos,]
+#calc outlier value for lfmm
+cor.frame<-data.frame(matrix(, nrow=0, ncol=2)) #init df
+for (i in sig.pos){
+  frq<-as.numeric(as.vector(phase1.all.freqs.hum[phase1.all.freqs.hum$id == i,3:16]))
+  mod<-summary(lm(frq ~ sort.pops.phase1$hannual)) #perform linear reg
+  # store 9 values describing the correlation to feed into machine learning
+  cor.frame<-rbind(cor.frame, cbind(i,
+                                    sort(abs(frq-mean(frq)))[14]-sort(abs(frq-mean(frq)))[13]
+  )
+  )
+}
+
+#store
+baye.outliers<-as.numeric(as.character(cor.frame[,2]))
+
+#plot
+hist(baye.outliers, main="greatest allele frequency difference between two populations", col = rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue"), xlim=c(0,1),
+     xlab = NULL)
+hist(r2vim.outliers, col = rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink"), add =TRUE)
+legend("topright", c("bayescenv", "r2vim"),
+       fill=c(rgb(173,216,230,max = 255, alpha = 80, names = "lt.blue"), rgb(255,192,203, max = 255, alpha = 80, names = "lt.pink")),
+       box.col = "white")
+```
+
