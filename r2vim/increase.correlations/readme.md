@@ -1,0 +1,1 @@
+Some of the chromosome/env variable combos showed low correlation between runs and the number of trees had to be increased from 1000, up to as many as 15000 in some cases. Scripts for this and for combining the outputs are here.
