@@ -1,1 +1,1 @@
-#optimize the mtry parameter (the number of predictors to sample randomly at each node).
+#optimize the mtry parameter (the number of predictors to sample randomly at each node). See how this optimization step is done: https://devonderaad.github.io/Anopheles/r2vim/optimize.mtry/hum.X.r2vim.optimize.html
