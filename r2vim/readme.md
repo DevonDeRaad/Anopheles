@@ -1,1 +1,1 @@
-Scripts to optimize the parameter 'mtry' and then execute 10 replicates Random Forests each with a unique seed value and ntrees=1000 using the r2vim wrapper function in R. See the optimization step: https://devonderaad.github.io/Anopheles/r2vim/optimize.mtry/hum.X.r2vim.optimize.html See the 
+Scripts to optimize the parameter 'mtry' and then execute 10 replicates Random Forests each with a unique seed value and ntrees=1000 using the r2vim wrapper function in R.
