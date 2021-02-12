@@ -1,21 +1,21 @@
-# Anopheles
+Anopheles Genome Environment Associations 
+==================================================================================
+
+This repository contains a comprehensive compilation of code and expalantory visualization associated with the paper: Genome-environment Associations Reveal Omnigenic Adaptation to Ecological Niche Across the Distribution of Anopheles gambiae
+
+Visualizations
+------------
+
+### Example of the application of a Naive Bayes classifier to isolate SNPs with broad environmental associations, that are concordant in both Phase 1 and Phase 2 datasets
+
+<https://devonderaad.github.io/Anopheles/machine.learning.classification/ML.classification.lfmm.hum.html>
+
+### walkthrough on matching outlier SNPs to genes, testing for overrepresentation of GO terms, and searching for gene information
+
+For the LFMM humidity dataset: <https://devonderaad.github.io/Anopheles/humidity.gene.searching.html>
+
+For the LFMM precipitation dataset: <https://devonderaad.github.io/Anopheles/prec.gene.searching.html>
+
+For the LFMM temperature dataset: <https://devonderaad.github.io/Anopheles/temp.gene.searching.html>
 
 
-devonderaad.github.io/Anopheles/machine.learning.classification/ML.classification.lfmm.hum.html
-
-#walkthrough on matching SNPs to genes, testing for overrepresentation, and searching for gene information
-
-#humidity
-https://devonderaad.github.io/Anopheles/humidity.gene.searching.html
-
-#precipitation
-https://devonderaad.github.io/Anopheles/prec.gene.searching.html
-
-#temperature
-https://devonderaad.github.io/Anopheles/temp.gene.searching.html
-
-#gene overlap investigation
-https://devonderaad.github.io/Anopheles/gene.overlap.investigation.html
-
-#results for 29 Sept 2020 meeting
-https://devonderaad.github.io/Anopheles/plot.hums.together.html
