@@ -1,5 +1,5 @@
 ---
-title: "X.temp.r2vim"
+title: "X.rand.r2vim"
 author: "Devon DeRaad"
 date: "8/25/2020"
 output: html_document
@@ -21,11 +21,6 @@ library(parallel)
 ```
 
 ```{r}
-detectCores()
-#read in position information for X chrom
-pos<-read.table("maf05.ld100.matrix.X.012.pos")
-colnames(pos)<-c("chrom","bp")
-
 #read in environmental and population information
 env.pop<-read.csv("env.pop.csv")
 
@@ -35,12 +30,8 @@ snp.matrix<-read.table("maf05.ld100.matrix.X.012")[,-1]
 #drop all columns in the snp matrix containing missing data
 snp.matrix<-snp.matrix[,colSums(is.na(snp.matrix)) == 0]
 
-#subset the pos dataframe to only contain SNPs with complete information
-pos<-pos[colSums(is.na(snp.matrix)) == 0,]
-write.csv(pos, file = "X.chrom.no.missing.pos.csv", row.names = FALSE, quote=FALSE)
-
-#create reg_data including pop, temp variable, and X chrom SNP matrix
-reg_data<-as.data.frame(cbind(env.pop$population,env.pop$t_mean,snp.matrix))
+#create reg_data including pop, rand variable, and X chrom SNP matrix
+reg_data<-as.data.frame(cbind(env.pop$population,env.pop$random,snp.matrix))
 
 #rename columns to match pop and response
 colnames(reg_data)[1:2]<-c("pop","response")
@@ -74,7 +65,7 @@ reg_data_corrected[,ncol(reg_data_corrected)]-LM_SNP_i$residuals  #Should all be
 class(reg_data_corrected$response) #must be numeric
 
 # Export a copy of the corrected genotypes and phenotypes for future reference (This corresponds to the data in Table S6)
-write.csv(reg_data_corrected,file="X.temp.corrected.csv", row.names = FALSE, quote=FALSE)
+write.csv(reg_data_corrected,file="X.rand.corrected.csv", row.names = FALSE, quote=FALSE)
 ```
 
 ```{r}
@@ -114,7 +105,7 @@ lines(results_optimization$ntree[results_optimization$mtry == p],results_optimiz
 
 ```{r}
 ##read in adjusted df
-#reg_data_corrected<-read.csv("~/Downloads/X.temp.corrected.csv")
+#reg_data_corrected<-read.csv("~/Downloads/X.rand.corrected.csv")
 #p<-ncol(reg_data_corrected)-2
 #
 ##read in position info
@@ -143,7 +134,7 @@ lines(results_optimization$ntree[results_optimization$mtry == p],results_optimiz
 #abline(h=1, col="red")
 #
 ##save rel.vim.min values
-#write.csv(df, "X.temp.rel.vim.min.csv", row.names=FALSE, quote=FALSE)
+#write.csv(df, "X.rand.rel.vim.min.csv", row.names=FALSE, quote=FALSE)
 
 ```
 
