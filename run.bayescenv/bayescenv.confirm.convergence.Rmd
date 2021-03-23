@@ -13,7 +13,7 @@ library(lattice)
 #2R hum
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/1.hum.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/1.hum.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -27,7 +27,7 @@ plot(chain)
 #2L hum
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/2.hum.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/2.hum.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -41,7 +41,7 @@ plot(chain)
 #3R hum
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/3.hum.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/3.hum.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -55,7 +55,7 @@ plot(chain)
 #3L hum
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/4.hum.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/4.hum.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -69,7 +69,7 @@ plot(chain)
 #X hum
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/5.hum.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/5.hum.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -83,7 +83,7 @@ plot(chain)
 #2R temp
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/1.temp.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/1.temp.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -97,7 +97,7 @@ plot(chain)
 #2L temp
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/2.temp.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/2.temp.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -111,7 +111,7 @@ plot(chain)
 #3R temp
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/3.temp.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/3.temp.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -125,7 +125,7 @@ plot(chain)
 #3L temp
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/4.temp.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/4.temp.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -139,7 +139,7 @@ plot(chain)
 #X temp
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/5.temp.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/5.temp.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -153,7 +153,7 @@ plot(chain)
 #2R precip
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/1.precip.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/1.prec.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -167,7 +167,7 @@ plot(chain)
 #2L precip
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/2.precip.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/2.prec.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -181,7 +181,7 @@ plot(chain)
 #3R precip
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/3.precip.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/3.prec.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -195,7 +195,7 @@ plot(chain)
 #3L precip
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/4.precip.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/4.prec.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -209,7 +209,7 @@ plot(chain)
 #X precip
 ```{r, fig.asp = 1}
 #read in trace file
-chain <- read.table("~/Desktop/bayescenv.results/5.precip.sel" , header = TRUE)
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/5.prec.sel" , header = TRUE)
 chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
 chain<-chain[,3:ncol(chain)]
 heidel.diag(chain)             #To test for convergence
@@ -220,7 +220,154 @@ levelplot(t(autocorr.diag(chain)))
 plot(chain)
 ```
 
+#2R rand
+```{r, fig.asp = 1}
+#read in trace file
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/1.rand.sel" , header = TRUE)
+chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
+chain<-chain[,3:ncol(chain)]
+heidel.diag(chain)             #To test for convergence
+effectiveSize(chain)           #To compute effective sample size
+plot(effectiveSize(chain), xaxt='n', ylim=c(0,max(effectiveSize(chain))))+ abline(h=1000, col="red")+ axis(1, at=c(1:length(effectiveSize(chain))), labels=colnames(chain))
+autocorr.diag(chain)           #To look for auto-correlation
+levelplot(t(autocorr.diag(chain)))
+plot(chain)
+```
 
+#2L rand
+```{r, fig.asp = 1}
+#read in trace file
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/2.rand.sel" , header = TRUE)
+chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
+chain<-chain[,3:ncol(chain)]
+heidel.diag(chain)             #To test for convergence
+effectiveSize(chain)           #To compute effective sample size
+plot(effectiveSize(chain), xaxt='n', ylim=c(0,max(effectiveSize(chain))))+ abline(h=1000, col="red")+ axis(1, at=c(1:length(effectiveSize(chain))), labels=colnames(chain))
+autocorr.diag(chain)           #To look for auto-correlation
+levelplot(t(autocorr.diag(chain)))
+#plot(chain)
+#chain checked visually not shown here to save file size
+```
+
+#3R rand
+```{r, fig.asp = 1}
+#read in trace file
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/3.rand.sel" , header = TRUE)
+chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
+chain<-chain[,3:ncol(chain)]
+heidel.diag(chain)             #To test for convergence
+effectiveSize(chain)           #To compute effective sample size
+plot(effectiveSize(chain), xaxt='n', ylim=c(0,max(effectiveSize(chain))))+ abline(h=1000, col="red")+ axis(1, at=c(1:length(effectiveSize(chain))), labels=colnames(chain))
+autocorr.diag(chain)           #To look for auto-correlation
+levelplot(t(autocorr.diag(chain)))
+#plot(chain)
+#chain checked visually not shown here to save file size
+```
+
+#3L rand
+```{r, fig.asp = 1}
+#read in trace file
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/4.rand.sel" , header = TRUE)
+chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
+chain<-chain[,3:ncol(chain)]
+heidel.diag(chain)             #To test for convergence
+effectiveSize(chain)           #To compute effective sample size
+plot(effectiveSize(chain), xaxt='n', ylim=c(0,max(effectiveSize(chain))))+ abline(h=1000, col="red")+ axis(1, at=c(1:length(effectiveSize(chain))), labels=colnames(chain))
+autocorr.diag(chain)           #To look for auto-correlation
+levelplot(t(autocorr.diag(chain)))
+#plot(chain)
+#chain checked visually not shown here to save file size
+```
+
+#X rand
+```{r, fig.asp = 1}
+#read in trace file
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/5.rand.sel" , header = TRUE)
+chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
+chain<-chain[,3:ncol(chain)]
+heidel.diag(chain)             #To test for convergence
+effectiveSize(chain)           #To compute effective sample size
+plot(effectiveSize(chain), xaxt='n', ylim=c(0,max(effectiveSize(chain))))+ abline(h=1000, col="red")+ axis(1, at=c(1:length(effectiveSize(chain))), labels=colnames(chain))
+autocorr.diag(chain)           #To look for auto-correlation
+levelplot(t(autocorr.diag(chain)))
+#plot(chain)
+#chain checked visually not shown here to save file size
+```
+
+#2R corr
+```{r, fig.asp = 1}
+#read in trace file
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/1.corr.sel" , header = TRUE)
+chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
+chain<-chain[,3:ncol(chain)]
+heidel.diag(chain)             #To test for convergence
+effectiveSize(chain)           #To compute effective sample size
+plot(effectiveSize(chain), xaxt='n', ylim=c(0,max(effectiveSize(chain))))+ abline(h=1000, col="red")+ axis(1, at=c(1:length(effectiveSize(chain))), labels=colnames(chain))
+autocorr.diag(chain)           #To look for auto-correlation
+levelplot(t(autocorr.diag(chain)))
+#plot(chain)
+#chain checked visually not shown here to save file size
+```
+
+#2L corr
+```{r, fig.asp = 1}
+#read in trace file
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/2.corr.sel" , header = TRUE)
+chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
+chain<-chain[,3:ncol(chain)]
+heidel.diag(chain)             #To test for convergence
+effectiveSize(chain)           #To compute effective sample size
+plot(effectiveSize(chain), xaxt='n', ylim=c(0,max(effectiveSize(chain))))+ abline(h=1000, col="red")+ axis(1, at=c(1:length(effectiveSize(chain))), labels=colnames(chain))
+autocorr.diag(chain)           #To look for auto-correlation
+levelplot(t(autocorr.diag(chain)))
+#plot(chain)
+#chain checked visually not shown here to save file size
+```
+
+#3R corr
+```{r, fig.asp = 1}
+#read in trace file
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/3.corr.sel" , header = TRUE)
+chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
+chain<-chain[,3:ncol(chain)]
+heidel.diag(chain)             #To test for convergence
+effectiveSize(chain)           #To compute effective sample size
+plot(effectiveSize(chain), xaxt='n', ylim=c(0,max(effectiveSize(chain))))+ abline(h=1000, col="red")+ axis(1, at=c(1:length(effectiveSize(chain))), labels=colnames(chain))
+autocorr.diag(chain)           #To look for auto-correlation
+levelplot(t(autocorr.diag(chain)))
+#plot(chain)
+#chain checked visually not shown here to save file size
+```
+
+#3L corr
+```{r, fig.asp = 1}
+#read in trace file
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/4.corr.sel" , header = TRUE)
+chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
+chain<-chain[,3:ncol(chain)]
+heidel.diag(chain)             #To test for convergence
+effectiveSize(chain)           #To compute effective sample size
+plot(effectiveSize(chain), xaxt='n', ylim=c(0,max(effectiveSize(chain))))+ abline(h=1000, col="red")+ axis(1, at=c(1:length(effectiveSize(chain))), labels=colnames(chain))
+autocorr.diag(chain)           #To look for auto-correlation
+#levelplot(t(autocorr.diag(chain)))
+#plot(chain)
+#chain checked visually not shown here to save file size
+```
+
+#X corr
+```{r, fig.asp = 1}
+#read in trace file
+chain <- read.table("~/Desktop/anoph.phase2/bayescenv.results/5.corr.sel" , header = TRUE)
+chain <- mcmc(chain , thin = 10) #Adapt thin to its actual value (10 is the default)
+chain<-chain[,3:ncol(chain)]
+heidel.diag(chain)             #To test for convergence
+effectiveSize(chain)           #To compute effective sample size
+plot(effectiveSize(chain), xaxt='n', ylim=c(0,max(effectiveSize(chain))))+ abline(h=1000, col="red")+ axis(1, at=c(1:length(effectiveSize(chain))), labels=colnames(chain))
+autocorr.diag(chain)           #To look for auto-correlation
+levelplot(t(autocorr.diag(chain)))
+#plot(chain)
+#chain checked visually not shown here to save file size
+```
 
 
 
