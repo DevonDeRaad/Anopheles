@@ -6,7 +6,9 @@ This repository contains a comprehensive compilation of code and expalantory vis
 Visualizations of processes described in the paper
 ------------
 
-### Example of the application of a Naive Bayes classifier to isolate SNPs with broad environmental associations, that are concordant in both Phase 1 and Phase 2 datasets
+### Application of a Naive Bayes classifier to perform round 1 (isolate SNPs with broad environmental associations), and round 2 (isolate SNPs concordant in both Phase 1 and Phase 2 datasets) vetting process
+
+*   Example of the LFMM humidity dataset:
 
     > <https://devonderaad.github.io/Anopheles/machine.learning.classification/ML.classification.lfmm.hum.html>
 
