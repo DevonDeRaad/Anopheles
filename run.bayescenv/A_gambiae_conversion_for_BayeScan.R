@@ -2,7 +2,7 @@
 # Project: Anopheles gambiae ecological niche and genomics 
 # Process: Converting SNP matrix into geste format with genotype info 
 # Author(s): Devon A DeRaad, Marlon E. Cobos, Claudia Nunez-Penichet
-# Date: 01/04/2020 (dd/mm/yyyy)
+# Date: 04/03/2021 (dd/mm/yyyy)
 ##################################
 
 #define a function which will accept the snp matrix and output a geste matrix for a given population
@@ -25,17 +25,17 @@ geste.mat <- function(x) {
 }
 
 #bring in dataframe with locality and environmental data for each individual
-phase1.alldata <- read.csv(file = "FST_LFMM_BayeScan/phase1.allvariables.csv")
+phase1.alldata <- read.csv(file = "phase1.allvariables.csv")
 
 #genetic matrice names
-chrom_names <- list.files("FST_LFMM_BayeScan/", pattern = "geno.matrix.012$", full.names = TRUE)
+chrom_names <- list.files(".", pattern = "geno.matrix.012$", full.names = TRUE)
 chroms <- c("2L", "2R", "3L", "3R", "X")
 
 #new folder for geste files
 dir.create("Geste_files")
 
 #geste file names
-gfiles <- paste0("FST_LFMM_BayeScan/Geste_files/", chroms,".geste.txt")
+gfiles <- paste0("Geste_files/", chroms,".geste.txt")
 
 #latitudes indicating distinct populations
 lats <- unique(phase1.alldata$latitude)
@@ -52,7 +52,7 @@ pm <- lapply(1:length(chroms), function(x) {
   #add pops to file
   rd <- lapply(1:length(lats), function(y) {
     #subet matrix to only individuals (rows) from pop1
-    snp.mat <- chrom[phase1.alldata$latitude == lats[y],]
+    snp.mat <- chrom[phase1.alldata$latitude == lats[y], ]
     #turn snp matrix into geste matrix
     ges <- geste.mat(snp.mat)
     #cat the appropriate '[pop]=_' identifier as a header

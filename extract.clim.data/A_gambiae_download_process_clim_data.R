@@ -33,14 +33,14 @@ for (i in years) {
     ### precipitation
     namep <- paste0("Data/Precipitation/CHELSA_prec_", # name of files in your computer
                     i, "_", jc, ".tif") 
-    urlp <- paste0("https://www.wsl.ch/lud/chelsa/data/timeseries/prec/CHELSA_prec_", # url of files in database
+    urlp <- paste0("https://os.zhdk.cloud.switch.ch/envicloud/chelsa/chelsa_V1/timeseries/prec/CHELSA_prec_", # url of files in database
                    i, "_", jc, "_V1.2.1.tif")
     downp <- download.file(url = urlp, destfile = namep, mode = "wb", quiet = TRUE) # donwload the file 
     
     ### temperature
     namet <- paste0("Data/Temperature/CHELSA_tmean_", # name of files in your computer
                     i, "_", jc, ".tif") 
-    urlt <- paste0("https://www.wsl.ch/lud/chelsa/data/timeseries/tmean/CHELSA_tmean_", # url of files in database
+    urlt <- paste0("https://os.zhdk.cloud.switch.ch/envicloud/chelsa/chelsa_V1/timeseries/tmean/CHELSA_tmean_", # url of files in database
                    i, "_", jc, "_V1.2.1.tif")
     downt <- download.file(url = urlt, destfile = namet, mode = "wb", quiet = TRUE) # donwload the file
   }
@@ -188,12 +188,18 @@ for (j in 1:12) {
   
   meant[[j]] <- calc(temps, mean)
   meanp[[j]] <- calc(precs, mean)
+  meanp[[j]][meanp[[j]] > 6000] <- NA
   
   cat(j, "of", length(1:12), "months\n")
 }
 
 meantr <- do.call(stack, meant)
 meanpr <- do.call(stack, meanp)
+
+msk <- !is.na(meanpr$layer.1)
+msk[msk[] == 0] <- NA
+
+meantr <- meantr * msk
 
 tr <- na.omit(values(meantr))
 pr <- na.omit(values(meanpr))
@@ -221,3 +227,40 @@ cdpr <- meanpr[[1]]
 cdpr[!is.na(cdpr[])] <- cdp
 writeRaster(cdpr, filename = "Env_data_extraction_grouping/Data/Final_variables/pseasonality.tif", 
             format = "GTiff", overwrite = TRUE)
+
+
+# preparing a raster variable spatially auto-correlated
+## base for new raster
+r1 <- merra_masked[[1]]
+
+## points from raster
+r1lonlat <- rasterToPoints(r1)
+
+## point that has minimum longitude
+min_lon <- r1lonlat[r1lonlat[, 1] == min(r1lonlat), -3]
+
+## distance
+dists <- pointDistance(matrix(min_lon[105, ], ncol = 2), r1lonlat[, -3], lonlat = TRUE)
+names(dists) <- 1:length(dists)
+
+## values in ascendant order
+vals <- round(seq(0, 10000, length.out = length(dists)), 3)
+
+tabl <- cbind(vals, dists = sort(dists))
+
+tabl1 <- tabl[names(dists), ]
+head(tabl1)
+
+## order and filling
+nona1 <- !is.na(r1[])
+r1[nona1] <- tabl1[, 1]
+
+## masking to area of interest
+r1_buff <- mask(crop(r1, hum[[4]]), hum[[4]])
+plot(r1_buff)
+
+
+## saving the layer
+dir.create("Env_data_extraction_grouping/Data/Spatial_autocor")
+writeRaster(r1, "Env_data_extraction_grouping/Data/Spatial_autocor/spa_autor.tif", format = "GTiff")
+writeRaster(r1_buff, "Env_data_extraction_grouping/Data/Final_variables/spa_autor.tif", format = "GTiff")
