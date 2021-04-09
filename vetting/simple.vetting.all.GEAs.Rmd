@@ -372,13 +372,19 @@ vetted<-data.frame(chrom=hom.full$chrom,
                    pass.direction.test=hom.full$cor < 0 & full.2$cor < 0 | hom.full$cor > 0 & full.2$cor > 0,
                    pass.strength.test=abs(hom.full$cor-full.2$cor) < .5)
 
-
-#calculate overall false positive rate
-1-sum(vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/nrow(vetted) #total tested SNPs
 ```
 
-#estimate false positive rate for each candidate SNP dataset
+#estimate false positive rate overall and for each candidate SNP dataset
 ```{r}
+#calculate overall false positive rate
+1-sum(vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/nrow(vetted) #total tested SNPs
+
+#because we expect our random variable (random between phases 1 and 2) to inflate the overall false positive rate,
+#calculate false positive rate for only the real environmental variables
+vet<-vetted[vetted$test != "lfmm.rand" & vetted$test != "baye.rand" & vetted$test != "vim.rand"
+            & vetted$test != "lfmm.corr" & vetted$test != "baye.corr" & vetted$test != "vim.corr",]
+1-sum(vet$pass.direction.test == TRUE & vet$pass.strength.test == TRUE)/nrow(vet) #total tested SNPs
+
 #lfmm calculate number of successfully vetted SNPs and the false positive rate for each test
 #lfmm hum
 sum(vetted$test == "lfmm.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
