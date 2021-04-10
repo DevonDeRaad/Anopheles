@@ -19,6 +19,10 @@ Visualizations of processes described in the paper
 *   Entire process can be viewed here, including visualizations of the resulting classifications showing intuitive usefulness of this process:
     > <https://devonderaad.github.io/Anopheles/vetting/simple.vetting.all.GEAs.html>
 
+### Testing the effect of spatial and genomic autocorrelation of dependent variable on GEA results 
+*   The process of calculating correlation matrices, mantel tests, and evaluating the effect on number/proportion of GEA outliers can be viewed here:
+    > <https://devonderaad.github.io/Anopheles/test.correlations/test.corrs.html>
+
 ### walkthrough on matching outlier SNPs to genes, testing for overrepresentation of GO terms, and searching for gene information
 
 *   For the LFMM humidity dataset:
