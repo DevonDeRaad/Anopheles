@@ -11,3 +11,4 @@ e.g.
 | 2R         	| 19059512 	| AGAP002308      	|
 
 
+Additionally, the entire set of identified outlier GEA SNPs is available at 'vetted.outliers.csv' with logical columns detailing whether each SNP passed our vetting procedure.
