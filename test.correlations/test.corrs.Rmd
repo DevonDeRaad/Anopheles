@@ -1,0 +1,646 @@
+---
+title: "Testing the effect of autocorrelation on GEAs"
+author: "Devon DeRaad"
+date: "4/10/2021"
+output: html_document
+---
+
+```{r}
+library(geosphere)
+library(StAMPP)
+library(ggplot2)
+library(adegenet)
+library(vcfR)
+
+#read in all significance values
+all.sigs<-read.csv("~/Downloads/all.sigs.csv")
+locs<-read.csv(file = "~/Downloads/phase1_all_vairables_last.csv")
+#make a subset of the locality data that only includes the 14 unique localities once
+xy.coords.only<- locs[,c(15,16)]
+as.numeric(rownames(unique(xy.coords.only)))
+phase1.uniques<-locs[as.numeric(rownames(unique(xy.coords.only))),]
+
+#generate pairwise geographic distance matrix
+unique.xy<-phase1.uniques[,c(15,16)]
+
+#make geographic dist matrix convert to km distance
+d.geo <- as.dist(distm(unique.xy, fun=distGeo))
+d.geo<-d.geo/1000
+d.geo<-as.matrix(d.geo)
+
+#generate pairwise environmental distance matrix for all 5 env variables (3 real and 2 simulated)
+d.prec<-as.matrix(dist(phase1.uniques$p_annual))
+d.hum<-as.matrix(dist(phase1.uniques$h_mean))
+d.temp<-as.matrix(dist(phase1.uniques$t_mean))
+d.rand<-as.matrix(dist(phase1.uniques$random))
+d.corr<-as.matrix(dist(phase1.uniques$autocorrelated))
+
+#make plots showing the relationship between geographic distance and each environmental value
+plot(d.geo,d.prec)
+plot(d.geo,d.hum)
+plot(d.geo,d.temp)
+plot(d.geo,d.rand)
+plot(d.geo,d.corr)
+```
+
+#analyze effect of spatial autocorrelation on number of GEA outliers identified
+```{r}
+#mantel test to quantify the strength of each of these relationships
+mantel.prec<-vegan::mantel(xdis = d.geo, ydis = d.prec)
+mantel.hum<-vegan::mantel(xdis = d.geo, ydis = d.hum)
+mantel.temp<-vegan::mantel(xdis = d.geo, ydis = d.temp)
+mantel.rand<-vegan::mantel(xdis = d.geo, ydis = d.rand)
+mantel.corr<-vegan::mantel(xdis = d.geo, ydis = d.corr)
+
+#open empty vector
+out<-c()
+#calc number of sig outliers for each df
+out[1]<-sum(all.sigs$lfmm.prec < .01)
+out[2]<-sum(all.sigs$lfmm.hum < .01)
+out[3]<-sum(all.sigs$lfmm.temp < .01)
+out[4]<-sum(all.sigs$lfmm.rand < .01)
+out[5]<-sum(all.sigs$lfmm.corr < .01)
+
+out[6]<-sum(all.sigs$baye.prec < .01)
+out[7]<-sum(all.sigs$baye.hum < .01)
+out[8]<-sum(all.sigs$baye.temp < .01)
+out[9]<-sum(all.sigs$baye.rand < .01)
+out[10]<-sum(all.sigs$baye.corr < .01)
+
+out[11]<-sum(all.sigs$vim.prec > 1)
+out[12]<-sum(all.sigs$vim.hum > 1)
+out[13]<-sum(all.sigs$vim.temp > 1)
+out[14]<-sum(all.sigs$vim.rand > 1)
+out[15]<-sum(all.sigs$vim.corr > 1)
+
+#make dataframe for plotting
+spatial.autocorr<-c(mantel.prec$statistic,mantel.hum$statistic,mantel.temp$statistic,mantel.rand$statistic,mantel.corr$statistic)
+spatial.autocorr<-c(spatial.autocorr,spatial.autocorr,spatial.autocorr)
+spatial.autocorr<-abs(spatial.autocorr)
+cors<-data.frame(env.var=rep(c("prec","hum","temp","rand","corr"), times=3),
+                 test=c(rep("LFMM2", times=5), rep("BayeScEnv", times=5), rep("r2VIM", times=5)),
+                 spat.autocorr=spatial.autocorr,
+                 num.sig.outliers=out)
+
+#plot 4A
+ggplot(cors, aes(x=spat.autocorr, y=num.sig.outliers, color=test)) +
+  geom_point(cex=3, alpha=.6)+
+  geom_smooth(method=lm, se=FALSE)+
+  theme_classic()+
+  labs(x="correlation between geographic and environmental distance", y="significant GEA SNPs")
+#ggsave("~/Downloads/geographic.genomic.correlations.pdf", height=3, width=5.5)
+
+#test significance of each correlation
+cor.test(cors$spat.autocorr[1:5],cors$num.sig.outliers[1:5])
+cor.test(cors$spat.autocorr[5:10],cors$num.sig.outliers[5:10])
+cor.test(cors$spat.autocorr[10:15],cors$num.sig.outliers[10:15])
+```
+
+#analyze effect of genomic autocorrelation of environmental vairables on number of GEA outliers identified
+```{r}
+#read in vcfs
+vcf.2L<-read.vcfR("~/Downloads/ag1000g.phase1.ar3.pass.biallelic.maf05.ld10000.2L.vcf.gz.recode.vcf")
+vcf.2R<-read.vcfR("~/Downloads/ag1000g.phase1.ar3.pass.biallelic.maf05.ld10000.2R.vcf.gz.recode.vcf")
+vcf.3L<-read.vcfR("~/Downloads/ag1000g.phase1.ar3.pass.biallelic.maf05.ld10000.3L.vcf.gz.recode.vcf")
+vcf.3R<-read.vcfR("~/Downloads/ag1000g.phase1.ar3.pass.biallelic.maf05.ld10000.3R.vcf.gz.recode.vcf")
+vcf.X<-read.vcfR("~/Downloads/ag1000g.phase1.ar3.pass.biallelic.maf05.ld10000.X.vcf.gz.recode.vcf")
+
+#combine all the variants into a single vcf
+vcf.2L@gt<-rbind(vcf.2L@gt,vcf.2R@gt,vcf.3L@gt,vcf.3R@gt,vcf.X@gt)
+vcf.2L@fix<-rbind(vcf.2L@fix,vcf.2R@fix,vcf.3L@fix,vcf.3R@fix,vcf.X@fix)
+vcf.2L
+
+#convert to genlight
+gen<-vcfR2genlight(vcf.2L)
+#assign pop to individuals
+pop(gen)<-locs$latitude
+#calculate pairwise Fst between pops across all variants
+fsts<-stamppFst(gen)
+#convert to distance matrix
+fsts<-as.matrix(as.dist(fsts$Fsts))
+
+#calculate mantel r statistic for each variable with genome-wide divergence between pops
+fst.prec<-vegan::mantel(xdis = fsts, ydis = d.prec)
+fst.hum<-vegan::mantel(xdis = fsts, ydis = d.hum)
+fst.temp<-vegan::mantel(xdis = fsts, ydis = d.temp)
+fst.rand<-vegan::mantel(xdis = fsts, ydis = d.rand)
+fst.corr<-vegan::mantel(xdis = fsts, ydis = d.corr)
+
+#make vector and add to dataframe
+genetic.autocorr<-c(fst.prec$statistic,fst.hum$statistic,fst.temp$statistic,fst.rand$statistic,fst.corr$statistic)
+genetic.autocorr<-c(genetic.autocorr,genetic.autocorr,genetic.autocorr)
+cors$gen.autocorr<-abs(genetic.autocorr)
+
+#make plot 4B
+ggplot(cors, aes(x=gen.autocorr, y=num.sig.outliers, color=test)) +
+  geom_point(cex=3, alpha=.6)+
+  geom_smooth(method=lm, se=FALSE)+
+  theme_classic()+
+  labs(x="correlation between genome-wide Fst and environmental divergence", y="significant GEA SNPs")
+#ggsave("~/Downloads/env.genomic.correlations.pdf", height=3, width=5.5)
+
+#test significance of each regression line
+cor.test(cors$gen.autocorr[1:5],cors$num.sig.outliers[1:5])
+cor.test(cors$gen.autocorr[5:10],cors$num.sig.outliers[5:10])
+cor.test(cors$gen.autocorr[10:15],cors$num.sig.outliers[10:15])
+```
+
+#test for significant difference in overall number of GEA outliers identified between real and randomly generated variables
+```{r}
+#add the variable type to the dataframe
+cors$var.type<-c("environmental","environmental","environmental","randomly generated","randomly generated",
+                 "environmental","environmental","environmental","randomly generated","randomly generated",
+                 "environmental","environmental","environmental","randomly generated","randomly generated")
+
+#4D
+ggplot(cors, aes(x=var.type, y=num.sig.outliers)) + 
+  geom_boxplot()+
+  geom_jitter(position=position_jitter(0), cex=2, alpha=.6)+
+  theme_classic()+
+labs(x="GEA independent variable", y="significant GEA SNPs")
+ggsave("~/Downloads/env.random.comparison.pdf", height=3, width=4.25)
+
+#t test to assess whether we see a significant difference in total number of outliers identified between real and fake variables
+t.test(cors$num.sig.outliers[cors$var.type == "environmental"], cors$num.sig.outliers[cors$var.type == "randomly generated"])
+```
+
+#visualize the genomic autocorrelation of each variable in each of the four discrete regions of genomic relatedness
+```{r}
+#make pairwise correlation matrices for Fst within each of the four distinct regions
+#compare pairwise correlation matrices for each env variable with each genomic region (4x5 comparisons)
+#calculate the proportion of significant SNPs within each region for each method (3 methods x 4 regions)
+#total: 60 comparisons showing correlation between genetic and environmental variation on the x axis, and %outlier SNPs on the x axis
+
+#reset VCFs
+vcf.2L<-read.vcfR("~/Downloads/ag1000g.phase1.ar3.pass.biallelic.maf05.ld10000.2L.vcf.gz.recode.vcf")
+vcf.2R<-read.vcfR("~/Downloads/ag1000g.phase1.ar3.pass.biallelic.maf05.ld10000.2R.vcf.gz.recode.vcf")
+vcf.3L<-read.vcfR("~/Downloads/ag1000g.phase1.ar3.pass.biallelic.maf05.ld10000.3L.vcf.gz.recode.vcf")
+vcf.3R<-read.vcfR("~/Downloads/ag1000g.phase1.ar3.pass.biallelic.maf05.ld10000.3R.vcf.gz.recode.vcf")
+vcf.X<-read.vcfR("~/Downloads/ag1000g.phase1.ar3.pass.biallelic.maf05.ld10000.X.vcf.gz.recode.vcf")
+
+#reorder locs file to match the same order as the vcfs
+locs<-locs[match(colnames(vcf.2L@gt)[-1],locs$ox_code),]
+rownames(locs)<-1:765
+#verify that all samples are present in the vcf in the same order as in the locality df
+colnames(vcf.2L@gt)[-1] == locs$ox_code
+
+#make a subset of the locality data that only includes the 14 unique localities once
+xy.coords.only<- locs[,c(15,16)]
+as.numeric(rownames(unique(xy.coords.only)))
+phase1.uniques<-locs[as.numeric(rownames(unique(xy.coords.only))),]
+#make sure these are in the same order
+phase1.uniques$t_mean == unique(locs$t_mean)
+
+#generate pairwise environmental distance matrix for all 5 env variables (3 real and 2 simulated)
+d.prec<-as.matrix(dist(phase1.uniques$p_annual))
+d.hum<-as.matrix(dist(phase1.uniques$h_mean))
+d.temp<-as.matrix(dist(phase1.uniques$t_mean))
+d.rand<-as.matrix(dist(phase1.uniques$random))
+d.corr<-as.matrix(dist(phase1.uniques$autocorrelated))
+
+#generate pairwise genetic distance matrix between the same 14 localities,
+#using each of the 4 discrete regions of relatedness throughout the genome
+#convert vcfR to genlight
+gen.2La<-vcfR2genlight(vcf.2L)
+#subset 2La
+gen.2La<-gen.2La[,gen.2La$position > 20524058 & gen.2La$position < 42165532]
+gen.2La
+#assign pop to individuals
+pop(gen.2La)<-locs$latitude
+#calculate pairwise Fst between pops
+fst.2La<-stamppFst(gen.2La)
+#convert to distance matrix
+fst.2La<-as.matrix(as.dist(fst.2La$Fsts))
+
+#subset 2Rb
+#convert vcfR to genlight
+gen.2Rb<-vcfR2genlight(vcf.2R)
+#subset 2Rb out of 2R
+gen.2Rb<-gen.2Rb[,gen.2Rb$position > 19023925 & gen.2Rb$position < 26758676]
+gen.2Rb
+#assign pop to individuals
+pop(gen.2Rb)<-locs$latitude
+#calculate pairwise Fst between pops
+fst.2Rb<-stamppFst(gen.2Rb)
+#convert to distance matrix
+fst.2Rb<-as.matrix(as.dist(fst.2Rb$Fsts))
+
+#subset geography
+#3R 0-25Mb
+#convert vcfR to genlight
+gen.geog<-vcfR2genlight(vcf.3R)
+#subset geog out of 3R
+gen.geog<-gen.geog[,gen.geog$position < 25000000]
+gen.geog
+#assign pop to individuals
+pop(gen.geog)<-locs$latitude
+#calculate pairwise Fst between pops
+fst.geog<-stamppFst(gen.geog)
+#convert to distance matrix
+fst.geog<-as.matrix(as.dist(fst.geog$Fsts))
+
+
+#subset species
+#2R 35-55Mb
+#convert vcfR to genlight
+gen.spec<-vcfR2genlight(vcf.2R)
+#subset spec out of X
+gen.spec<-gen.spec[,gen.spec$position > 35000000 & gen.spec$position < 55000000]
+gen.spec
+#assign pop to individuals
+pop(gen.spec)<-locs$latitude
+#calculate pairwise Fst between pops
+fst.spec<-stamppFst(gen.spec)
+#convert to distance matrix
+fst.spec<-as.matrix(as.dist(fst.spec$Fsts))
+
+#####
+####
+###
+##
+#test for correlation between each of the 4 discrete genomic regions x 5 environmental variables
+#open vectors to store test info and r value
+test<-c()
+storer<-c()
+#plot figure
+#pdf(file="~/Downloads/corrs.nolabs.pdf", width=10,height=8)
+par(mar=c(2,2,2,2))
+par(mfrow=c(4,5))
+
+#start with 2Rb
+#d.prec x gen structure in 2Rb
+s<-ape::mantel.test(d.prec,fst.2Rb)
+r<-vegan::mantel(xdis = d.prec, ydis = fst.2Rb)
+plot(d.prec,fst.2Rb, pch=20,cex=1.5, col = rgb(red = 1, green = .6, blue = .6, alpha = 0.5),
+     #ylab = "pairwise Fst in 2Rb inversion", xlab = "annual precip difference")
+     ann=FALSE)
+abline(lm(as.dist(fst.2Rb)~as.dist(d.prec)), lty = 2)
+text(x = max(d.prec)*.86, y = max(fst.2Rb)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.prec)*.86, y = max(fst.2Rb)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[1]<-"prec.2Rb"
+storer[1]<-r$statistic
+
+#d.hum x gen structure in 2Rb
+s<-ape::mantel.test(d.hum,fst.2Rb)
+r<-vegan::mantel(xdis = d.hum, ydis = fst.2Rb)
+plot(d.hum,fst.2Rb, pch=20,cex=1.5, col = rgb(red = 1, green = .6, blue = .6, alpha = 0.5),
+     #ylab = "pairwise Fst in 2Rb inversion", xlab = "humidity difference (10^5 kg of water/kg of air)")
+     ann=FALSE)
+abline(lm(as.dist(fst.2Rb)~as.dist(d.hum)), lty = 2)
+text(x = max(d.hum)*.86, y = max(fst.2Rb)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.hum)*.86, y = max(fst.2Rb)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[2]<-"hum.2Rb"
+storer[2]<-r$statistic
+
+#d.temp x gen structure in 2Rb
+s<-ape::mantel.test(d.temp,fst.2Rb)
+r<-vegan::mantel(xdis = d.temp, ydis = fst.2Rb)
+plot(d.temp,fst.2Rb, pch=20,cex=1.5, col = rgb(red = 1, green = .6, blue = .6, alpha = 0.5),
+     #ylab = "pairwise Fst in 2La inversion", xlab = "mean annual temp difference")
+     ann=FALSE)
+abline(lm(as.dist(fst.2Rb)~as.dist(d.temp)), lty = 2)
+text(x = max(d.temp)*.86, y = max(fst.2Rb)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.temp)*.86, y = max(fst.2Rb)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[3]<-"temp.2Rb"
+storer[3]<-r$statistic
+
+#d.corr x gen structure in 2Rb
+s<-ape::mantel.test(d.corr,fst.2Rb)
+r<-vegan::mantel(xdis = d.corr, ydis = fst.2Rb)
+plot(d.corr,fst.2Rb, pch=20,cex=1.5, col = rgb(red = 1, green = .6, blue = .6, alpha = 0.5),
+     #ylab = "pairwise Fst in 2Rb inversion", xlab = "spatially autocorrelated random variable")
+     ann=FALSE)
+abline(lm(as.dist(fst.2Rb)~as.dist(d.corr)), lty = 2)
+text(x = max(d.corr)*.86, y = max(fst.2Rb)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.corr)*.86, y = max(fst.2Rb)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[4]<-"corr.2Rb"
+storer[4]<-r$statistic
+
+#d.rand x gen structure in 2Rb
+s<-ape::mantel.test(d.rand,fst.2Rb)
+r<-vegan::mantel(xdis = d.rand, ydis = fst.2Rb)
+plot(d.rand,fst.2Rb, pch=20,cex=1.5, col = rgb(red = 1, green = .6, blue = .6, alpha = 0.5),
+     #ylab = "pairwise Fst in 2Rb inversion", xlab = "true random variable")
+     ann=FALSE)
+abline(lm(as.dist(fst.2Rb)~as.dist(d.rand)), lty = 2)
+text(x = max(d.rand)*.86, y = max(fst.2Rb)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.rand)*.86, y = max(fst.2Rb)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[5]<-"rand.2Rb"
+storer[5]<-r$statistic
+
+
+#####
+####
+###
+##now 2La
+#d.prec x gen structure in 2La
+s<-ape::mantel.test(d.prec,fst.2La)
+r<-vegan::mantel(xdis = d.prec, ydis = fst.2La)
+plot(d.prec,fst.2La, pch=20,cex=1.5, col = rgb(red = .6, green = .6, blue = 1, alpha = 0.5),
+     #ylab = "pairwise Fst in 2La inversion", xlab = "annual precip difference")
+     ann=FALSE)
+abline(lm(as.dist(fst.2La)~as.dist(d.prec)), lty = 2)
+text(x = max(d.prec)*.86, y = max(fst.2La)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.prec)*.86, y = max(fst.2La)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[6]<-"prec.2La"
+storer[6]<-r$statistic
+
+#d.hum x gen structure in 2La
+s<-ape::mantel.test(d.hum,fst.2La)
+r<-vegan::mantel(xdis = d.hum, ydis = fst.2La)
+plot(d.hum,fst.2La, pch=20,cex=1.5, col = rgb(red = .6, green = .6, blue = 1, alpha = 0.5),
+     #ylab = "pairwise Fst in 2La inversion", xlab = "humidity difference (10^5 kg of water/kg of air)")
+     ann=FALSE)
+abline(lm(as.dist(fst.2La)~as.dist(d.hum)), lty = 2)
+text(x = max(d.hum)*.86, y = max(fst.2La)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.hum)*.86, y = max(fst.2La)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[7]<-"hum.2La"
+storer[7]<-r$statistic
+
+#d.temp x gen structure in 2La
+s<-ape::mantel.test(d.temp,fst.2La)
+r<-vegan::mantel(xdis = d.temp, ydis = fst.2La)
+plot(d.temp,fst.2La, pch=20,cex=1.5, col = rgb(red = .6, green = .6, blue = 1, alpha = 0.5),
+     #ylab = "pairwise Fst in 2La inversion", xlab = "mean annual temp difference")
+     ann=FALSE)
+abline(lm(as.dist(fst.2La)~as.dist(d.temp)), lty = 2)
+text(x = max(d.temp)*.86, y = max(fst.2La)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.temp)*.86, y = max(fst.2La)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[8]<-"temp.2La"
+storer[8]<-r$statistic
+
+#d.corr x gen structure in 2La
+s<-ape::mantel.test(d.corr,fst.2La)
+r<-vegan::mantel(xdis = d.corr, ydis = fst.2La)
+plot(d.corr,fst.2La, pch=20,cex=1.5, col = rgb(red = .6, green = .6, blue = 1, alpha = 0.5),
+     #ylab = "pairwise Fst in 2La inversion", xlab = "spatially autocorrelated random variable")
+     ann=FALSE)
+abline(lm(as.dist(fst.2La)~as.dist(d.corr)), lty = 2)
+text(x = max(d.corr)*.86, y = max(fst.2La)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.corr)*.86, y = max(fst.2La)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[9]<-"corr.2La"
+storer[9]<-r$statistic
+
+#d.rand x gen structure in 2La
+s<-ape::mantel.test(d.rand,fst.2La)
+r<-vegan::mantel(xdis = d.rand, ydis = fst.2La)
+plot(d.rand,fst.2La, pch=20,cex=1.5, col = rgb(red = .6, green = .6, blue = 1, alpha = 0.5),
+     #ylab = "pairwise Fst in 2La inversion", xlab = "true random variable")
+     ann=FALSE)
+abline(lm(as.dist(fst.2La)~as.dist(d.rand)), lty = 2)
+text(x = max(d.rand)*.86, y = max(fst.2La)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.rand)*.86, y = max(fst.2La)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[10]<-"rand.2La"
+storer[10]<-r$statistic
+
+
+#####
+####
+###
+##now geog
+#d.prec x gen structure in geog
+s<-ape::mantel.test(d.prec,fst.geog)
+r<-vegan::mantel(xdis = d.prec, ydis = fst.geog)
+plot(d.prec,fst.geog, pch=20,cex=1.5, col = rgb(red = .0, green = .0, blue = .0, alpha = 0.5),
+     #ylab = "pairwise Fst in geog", xlab = "annual precip difference")
+     ann=FALSE)
+abline(lm(as.dist(fst.geog)~as.dist(d.prec)), lty = 2)
+text(x = max(d.prec)*.86, y = max(fst.geog)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.prec)*.86, y = max(fst.geog)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[11]<-"prec.geog"
+storer[11]<-r$statistic
+
+#d.hum x gen structure in geog
+s<-ape::mantel.test(d.hum,fst.geog)
+r<-vegan::mantel(xdis = d.hum, ydis = fst.geog)
+plot(d.hum,fst.geog, pch=20,cex=1.5, col = rgb(red = .0, green = .0, blue = .0, alpha = 0.5),
+     #ylab = "pairwise Fst in geog", xlab = "humidity difference (10^5 kg of water/kg of air)")
+     ann=FALSE)
+abline(lm(as.dist(fst.geog)~as.dist(d.hum)), lty = 2)
+text(x = max(d.hum)*.86, y = max(fst.geog)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.hum)*.86, y = max(fst.geog)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+test[12]<-"hum.geog"
+storer[12]<-r$statistic
+
+#d.temp x gen structure in geog
+s<-ape::mantel.test(d.temp,fst.geog)
+r<-vegan::mantel(xdis = d.temp, ydis = fst.geog)
+plot(d.temp,fst.geog, pch=20,cex=1.5, col = rgb(red = .0, green = .0, blue = .0, alpha = 0.5),
+     #ylab = "pairwise Fst in geog", xlab = "mean annual temp difference")
+     ann=FALSE)
+abline(lm(as.dist(fst.geog)~as.dist(d.temp)), lty = 2)
+text(x = max(d.temp)*.86, y = max(fst.geog)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.temp)*.86, y = max(fst.geog)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+test[13]<-"temp.geog"
+storer[13]<-r$statistic
+
+#d.corr x gen structure in geog
+s<-ape::mantel.test(d.corr,fst.geog)
+r<-vegan::mantel(xdis = d.corr, ydis = fst.geog)
+plot(d.corr,fst.geog, pch=20,cex=1.5, col = rgb(red = .0, green = .0, blue = .0, alpha = 0.5),
+     #ylab = "pairwise Fst in geog", xlab = "spatially autocorrelated random variable")
+     ann=FALSE)
+abline(lm(as.dist(fst.geog)~as.dist(d.corr)), lty = 2)
+text(x = max(d.corr)*.86, y = max(fst.geog)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.corr)*.86, y = max(fst.geog)*.9, labels = bquote(p == .(round(s$p, digits = 3))))
+test[14]<-"corr.geog"
+storer[14]<-r$statistic
+
+#d.rand x gen structure in geog
+s<-ape::mantel.test(d.rand,fst.geog)
+r<-vegan::mantel(xdis = d.rand, ydis = fst.geog)
+plot(d.rand,fst.geog, pch=20,cex=1.5, col = rgb(red = .0, green = .0, blue = .0, alpha = 0.5),
+     #ylab = "pairwise Fst in geog", xlab = "true random variable")
+     ann=FALSE)
+abline(lm(as.dist(fst.geog)~as.dist(d.rand)), lty = 2)
+text(x = max(d.rand)*.86, y = max(fst.geog)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.rand)*.86, y = max(fst.geog)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+test[15]<-"rand.geog"
+storer[15]<-r$statistic
+
+#####
+####
+###
+##
+#now species
+#d.prec x gen structure in spec
+s<-ape::mantel.test(d.prec,fst.spec)
+r<-vegan::mantel(xdis = d.prec, ydis = fst.spec)
+plot(d.prec,fst.spec, pch=20,cex=1.5, col = rgb(red = .6, green = .6, blue = .6, alpha = 0.5),
+     #ylab = "pairwise Fst in spec", xlab = "annual precip difference")
+     ann=FALSE)
+abline(lm(as.dist(fst.spec)~as.dist(d.prec)), lty = 2)
+text(x = max(d.prec)*.86, y = max(fst.spec)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.prec)*.86, y = max(fst.spec)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[16]<-"prec.species"
+storer[16]<-r$statistic
+
+#d.hum x gen structure in spec
+s<-ape::mantel.test(d.hum,fst.spec)
+r<-vegan::mantel(xdis = d.hum, ydis = fst.spec)
+plot(d.hum,fst.spec, pch=20,cex=1.5, col = rgb(red = .6, green = .6, blue = .6, alpha = 0.5),
+     #ylab = "pairwise Fst in spec", xlab = "humidity difference (10^5 kg of water/kg of air)")
+     ann=FALSE)
+abline(lm(as.dist(fst.spec)~as.dist(d.hum)), lty = 2)
+text(x = max(d.hum)*.86, y = max(fst.spec)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.hum)*.86, y = max(fst.spec)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[17]<-"hum.species"
+storer[17]<-r$statistic
+
+#d.temp x gen structure in spec
+s<-ape::mantel.test(d.temp,fst.spec)
+r<-vegan::mantel(xdis = d.temp, ydis = fst.spec)
+plot(d.temp,fst.spec, pch=20,cex=1.5, col = rgb(red = .6, green = .6, blue = .6, alpha = 0.5),
+     #ylab = "pairwise Fst in spec", xlab = "mean annual temp difference")
+     ann=FALSE)
+abline(lm(as.dist(fst.spec)~as.dist(d.temp)), lty = 2)
+text(x = max(d.temp)*.86, y = max(fst.spec)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.temp)*.86, y = max(fst.spec)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[18]<-"temp.species"
+storer[18]<-r$statistic
+
+#d.corr x gen structure in spec
+s<-ape::mantel.test(d.corr,fst.spec)
+r<-vegan::mantel(xdis = d.corr, ydis = fst.spec)
+plot(d.corr,fst.spec, pch=20,cex=1.5, col = rgb(red = .6, green = .6, blue = .6, alpha = 0.5),
+     #ylab = "pairwise Fst in spec", xlab = "spatially autocorrelated random variable")
+     ann=FALSE)
+abline(lm(as.dist(fst.spec)~as.dist(d.corr)), lty = 2)
+text(x = max(d.corr)*.86, y = max(fst.spec)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.corr)*.86, y = max(fst.spec)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[19]<-"corr.species"
+storer[19]<-r$statistic
+
+#d.rand x gen structure in spec
+s<-ape::mantel.test(d.rand,fst.spec)
+r<-vegan::mantel(xdis = d.rand, ydis = fst.spec)
+plot(d.rand,fst.spec, pch=20,cex=1.5, col = rgb(red = .6, green = .6, blue = .6, alpha = 0.5),
+     #ylab = "pairwise Fst in spec", xlab = "true random variable")
+     ann=FALSE)
+abline(lm(as.dist(fst.spec)~as.dist(d.rand)), lty = 2)
+text(x = max(d.rand)*.86, y = max(fst.spec)*.98, labels = bquote(r == .(round(r$statistic, digits = 2))))
+text(x = max(d.rand)*.86, y = max(fst.spec)*.9, labels = bquote(p == .(round(s$p, digits = 2))))
+#store values
+test[20]<-"rand.species"
+storer[20]<-r$statistic
+
+#shut down the figure
+#dev.off()
+```
+
+#calculate proportion of tested SNPs in each genomic region identified as significant for each GEA test (3 methods x 4 genomic regions x 5 environmental vairables = 60 data points)
+```{r}
+#create dataframe to hold comparisons between significant percentage and degree of confounding genetic variation
+f<-data.frame(test=rep(test, times=3),
+              r=rep(storer, times=3))
+
+#create vector to hold the significant proportion for each of the tests in each of the genomic regions
+prop.sig<-c()
+test<-c(rep("LFMM2", times=20),rep("BayeScEnv", times=20),rep("r2VIM", times=20))
+#calc sig prop for each test
+sigs.2Rb<-all.sigs[all.sigs$Chromosome == "2R" & all.sigs$Position > 20524058 & all.sigs$Position < 42165532,]
+sigs.2La<-all.sigs[all.sigs$Chromosome == "2L" & all.sigs$Position > 19023925 & all.sigs$Position < 26758676,]
+sigs.geog<-all.sigs[all.sigs$Chromosome == "3R" & all.sigs$Position < 25000000,]
+sigs.species<-all.sigs[all.sigs$Chromosome == "2R" & all.sigs$Position > 35000000 & all.sigs$Position < 55000000,]
+
+#lfmm test 2Rb, 2La, geog, species
+prop.sig[1]<-sum(sigs.2Rb$lfmm.prec < .01)/nrow(sigs.2Rb)
+prop.sig[2]<-sum(sigs.2Rb$lfmm.hum < .01)/nrow(sigs.2Rb)
+prop.sig[3]<-sum(sigs.2Rb$lfmm.temp < .01)/nrow(sigs.2Rb)
+prop.sig[4]<-sum(sigs.2Rb$lfmm.corr < .01)/nrow(sigs.2Rb)
+prop.sig[5]<-sum(sigs.2Rb$lfmm.rand < .01)/nrow(sigs.2Rb)
+prop.sig[6]<-sum(sigs.2La$lfmm.prec < .01)/nrow(sigs.2La)
+prop.sig[7]<-sum(sigs.2La$lfmm.hum < .01)/nrow(sigs.2La)
+prop.sig[8]<-sum(sigs.2La$lfmm.temp < .01)/nrow(sigs.2La)
+prop.sig[9]<-sum(sigs.2La$lfmm.corr < .01)/nrow(sigs.2La)
+prop.sig[10]<-sum(sigs.2La$lfmm.rand < .01)/nrow(sigs.2La)
+prop.sig[11]<-sum(sigs.geog$lfmm.prec < .01)/nrow(sigs.geog)
+prop.sig[12]<-sum(sigs.geog$lfmm.hum < .01)/nrow(sigs.geog)
+prop.sig[13]<-sum(sigs.geog$lfmm.temp < .01)/nrow(sigs.geog)
+prop.sig[14]<-sum(sigs.geog$lfmm.corr < .01)/nrow(sigs.geog)
+prop.sig[15]<-sum(sigs.geog$lfmm.rand < .01)/nrow(sigs.geog)
+prop.sig[16]<-sum(sigs.species$lfmm.prec < .01)/nrow(sigs.species)
+prop.sig[17]<-sum(sigs.species$lfmm.hum < .01)/nrow(sigs.species)
+prop.sig[18]<-sum(sigs.species$lfmm.temp < .01)/nrow(sigs.species)
+prop.sig[19]<-sum(sigs.species$lfmm.corr < .01)/nrow(sigs.species)
+prop.sig[20]<-sum(sigs.species$lfmm.rand < .01)/nrow(sigs.species)
+
+#bayescenv test 2Rb, 2La, geog, species
+prop.sig[21]<-sum(sigs.2Rb$baye.prec < .01)/nrow(sigs.2Rb)
+prop.sig[22]<-sum(sigs.2Rb$baye.hum < .01)/nrow(sigs.2Rb)
+prop.sig[23]<-sum(sigs.2Rb$baye.temp < .01)/nrow(sigs.2Rb)
+prop.sig[24]<-sum(sigs.2Rb$baye.corr < .01)/nrow(sigs.2Rb)
+prop.sig[25]<-sum(sigs.2Rb$baye.rand < .01)/nrow(sigs.2Rb)
+prop.sig[26]<-sum(sigs.2La$baye.prec < .01)/nrow(sigs.2La)
+prop.sig[27]<-sum(sigs.2La$baye.hum < .01)/nrow(sigs.2La)
+prop.sig[28]<-sum(sigs.2La$baye.temp < .01)/nrow(sigs.2La)
+prop.sig[29]<-sum(sigs.2La$baye.corr < .01)/nrow(sigs.2La)
+prop.sig[30]<-sum(sigs.2La$baye.rand < .01)/nrow(sigs.2La)
+prop.sig[31]<-sum(sigs.geog$baye.prec < .01)/nrow(sigs.geog)
+prop.sig[32]<-sum(sigs.geog$baye.hum < .01)/nrow(sigs.geog)
+prop.sig[33]<-sum(sigs.geog$baye.temp < .01)/nrow(sigs.geog)
+prop.sig[34]<-sum(sigs.geog$baye.corr < .01)/nrow(sigs.geog)
+prop.sig[35]<-sum(sigs.geog$baye.rand < .01)/nrow(sigs.geog)
+prop.sig[36]<-sum(sigs.species$baye.prec < .01)/nrow(sigs.species)
+prop.sig[37]<-sum(sigs.species$baye.hum < .01)/nrow(sigs.species)
+prop.sig[38]<-sum(sigs.species$baye.temp < .01)/nrow(sigs.species)
+prop.sig[39]<-sum(sigs.species$baye.corr < .01)/nrow(sigs.species)
+prop.sig[40]<-sum(sigs.species$baye.rand < .01)/nrow(sigs.species)
+
+#r2VIM test 2Rb, 2La, geog, species
+prop.sig[41]<-sum(sigs.2Rb$vim.prec > 1)/nrow(sigs.2Rb)
+prop.sig[42]<-sum(sigs.2Rb$vim.hum > 1)/nrow(sigs.2Rb)
+prop.sig[43]<-sum(sigs.2Rb$vim.temp > 1)/nrow(sigs.2Rb)
+prop.sig[44]<-sum(sigs.2Rb$vim.corr > 1)/nrow(sigs.2Rb)
+prop.sig[45]<-sum(sigs.2Rb$vim.rand > 1)/nrow(sigs.2Rb)
+prop.sig[46]<-sum(sigs.2La$vim.prec > 1)/nrow(sigs.2La)
+prop.sig[47]<-sum(sigs.2La$vim.hum > 1)/nrow(sigs.2La)
+prop.sig[48]<-sum(sigs.2La$vim.temp > 1)/nrow(sigs.2La)
+prop.sig[49]<-sum(sigs.2La$vim.corr > 1)/nrow(sigs.2La)
+prop.sig[50]<-sum(sigs.2La$vim.rand > 1)/nrow(sigs.2La)
+prop.sig[51]<-sum(sigs.geog$vim.prec > 1)/nrow(sigs.geog)
+prop.sig[52]<-sum(sigs.geog$vim.hum > 1)/nrow(sigs.geog)
+prop.sig[53]<-sum(sigs.geog$vim.temp > 1)/nrow(sigs.geog)
+prop.sig[54]<-sum(sigs.geog$vim.corr > 1)/nrow(sigs.geog)
+prop.sig[55]<-sum(sigs.geog$vim.rand > 1)/nrow(sigs.geog)
+prop.sig[56]<-sum(sigs.species$vim.prec > 1)/nrow(sigs.species)
+prop.sig[57]<-sum(sigs.species$vim.hum > 1)/nrow(sigs.species)
+prop.sig[58]<-sum(sigs.species$vim.temp > 1)/nrow(sigs.species)
+prop.sig[59]<-sum(sigs.species$vim.corr > 1)/nrow(sigs.species)
+prop.sig[60]<-sum(sigs.species$vim.rand > 1)/nrow(sigs.species)
+
+#add to dataframe
+f$comps<-test
+f$prop.sig<-prop.sig
+
+#plot the resulting relationship
+#4C
+ggplot(f, aes(x=abs(r), y=prop.sig, color=comps)) + 
+  geom_point(cex=3, alpha=.6)+
+  geom_smooth(method=lm, se=FALSE)+
+  theme_classic()+
+  labs(x="correlation between genetic and environmental divergence \n for a given region of genomic relatedness",
+       y="proportion of significant GEA SNPs")
+ggsave("~/Downloads/corr.snps.genomic.regions.pdf", height=3, width=5.5)
+
+#test significance of each correlation
+cor.test(f$r[1:20],f$prop.sig[1:20])
+cor.test(f$r[20:40],f$prop.sig[20:40])
+cor.test(f$r[40:60],f$prop.sig[40:60])
+```
+
