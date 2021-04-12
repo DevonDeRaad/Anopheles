@@ -179,10 +179,51 @@ for (i in 1:nrow(x)){z<-rbind(z,sort.pops.phase1$random)}
 colnames(z)<-c(sort.pops.phase1$latitude)
 vim.rand.outliers<-cbind(x,z,test=rep("vim.rand", times=nrow(x)))
 
+#cors prec
+out<- all.sigs[all.sigs$cors.prec < .0001, c(1,2)]
+x <- phase1.all.freqs[phase1.all.freqs$id %in% paste(out[,1],out[,2]),c(1:16)]
+z<-data.frame()
+for (i in 1:nrow(x)){z<-rbind(z,sort.pops.phase1$p_annual)}
+colnames(z)<-c(sort.pops.phase1$latitude)
+cors.prec.outliers<-cbind(x,z,test=rep("cors.prec", times=nrow(x)))
+
+#cors hum
+out<- all.sigs[all.sigs$cors.hum < .0001, c(1,2)]
+x <- phase1.all.freqs[phase1.all.freqs$id %in% paste(out[,1],out[,2]),c(1:16)]
+z<-data.frame()
+for (i in 1:nrow(x)){z<-rbind(z,sort.pops.phase1$h_mean)}
+colnames(z)<-c(sort.pops.phase1$latitude)
+cors.hum.outliers<-cbind(x,z,test=rep("cors.hum", times=nrow(x)))
+
+#cors temp
+out<- all.sigs[all.sigs$cors.temp < .0001, c(1,2)]
+x <- phase1.all.freqs[phase1.all.freqs$id %in% paste(out[,1],out[,2]),c(1:16)]
+z<-data.frame()
+for (i in 1:nrow(x)){z<-rbind(z,sort.pops.phase1$t_mean)}
+colnames(z)<-c(sort.pops.phase1$latitude)
+cors.temp.outliers<-cbind(x,z,test=rep("cors.temp", times=nrow(x)))
+
+#cors corr
+out<- all.sigs[all.sigs$cors.corr < .0001, c(1,2)]
+x <- phase1.all.freqs[phase1.all.freqs$id %in% paste(out[,1],out[,2]),c(1:16)]
+z<-data.frame()
+for (i in 1:nrow(x)){z<-rbind(z,sort.pops.phase1$autocorrelated)}
+colnames(z)<-c(sort.pops.phase1$latitude)
+cors.corr.outliers<-cbind(x,z,test=rep("cors.corr", times=nrow(x)))
+
+#cors rand
+out<- all.sigs[all.sigs$cors.rand < .0001, c(1,2)]
+x <- phase1.all.freqs[phase1.all.freqs$id %in% paste(out[,1],out[,2]),c(1:16)]
+z<-data.frame()
+for (i in 1:nrow(x)){z<-rbind(z,sort.pops.phase1$random)}
+colnames(z)<-c(sort.pops.phase1$latitude)
+cors.rand.outliers<-cbind(x,z,test=rep("cors.rand", times=nrow(x)))
+
 #combine all the dataframes
 full<-rbind(lfmm.hum.outliers,lfmm.prec.outliers,lfmm.temp.outliers,lfmm.rand.outliers,lfmm.corr.outliers,
             baye.hum.outliers,baye.prec.outliers,baye.temp.outliers,baye.rand.outliers,baye.corr.outliers,
-            vim.hum.outliers,vim.prec.outliers,vim.temp.outliers,vim.rand.outliers,vim.corr.outliers)
+            vim.hum.outliers,vim.prec.outliers,vim.temp.outliers,vim.rand.outliers,vim.corr.outliers,
+            cors.hum.outliers,cors.prec.outliers,cors.temp.outliers,cors.rand.outliers,cors.corr.outliers)
 ```
 
 
@@ -333,10 +374,51 @@ for (i in 1:nrow(x)){z<-rbind(z,sort.pops.phase2$random)}
 colnames(z)<-c(sort.pops.phase2$latitude)
 vim.rand.outliers<-cbind(x,z,test=rep("vim.rand", times=nrow(x)))
 
+#cors prec
+out<- all.sigs[all.sigs$cors.prec < .0001, c(1,2)]
+x <- phase2.all.freqs[phase2.all.freqs$id %in% paste(out[,1],out[,2]),c(1:23)]
+z<-data.frame()
+for (i in 1:nrow(x)){z<-rbind(z,sort.pops.phase2$p_annual)}
+colnames(z)<-c(sort.pops.phase2$latitude)
+cors.prec.outliers<-cbind(x,z,test=rep("cors.prec", times=nrow(x)))
+
+#cors hum
+out<- all.sigs[all.sigs$cors.hum < .0001, c(1,2)]
+x <- phase2.all.freqs[phase2.all.freqs$id %in% paste(out[,1],out[,2]),c(1:23)]
+z<-data.frame()
+for (i in 1:nrow(x)){z<-rbind(z,sort.pops.phase2$h_mean)}
+colnames(z)<-c(sort.pops.phase2$latitude)
+cors.hum.outliers<-cbind(x,z,test=rep("cors.hum", times=nrow(x)))
+
+#cors temp
+out<- all.sigs[all.sigs$cors.temp < .0001, c(1,2)]
+x <- phase2.all.freqs[phase2.all.freqs$id %in% paste(out[,1],out[,2]),c(1:23)]
+z<-data.frame()
+for (i in 1:nrow(x)){z<-rbind(z,sort.pops.phase2$t_mean)}
+colnames(z)<-c(sort.pops.phase2$latitude)
+cors.temp.outliers<-cbind(x,z,test=rep("cors.temp", times=nrow(x)))
+
+#cors corr
+out<- all.sigs[all.sigs$cors.corr < .0001, c(1,2)]
+x <- phase2.all.freqs[phase2.all.freqs$id %in% paste(out[,1],out[,2]),c(1:23)]
+z<-data.frame()
+for (i in 1:nrow(x)){z<-rbind(z,sort.pops.phase2$autocorrelated)}
+colnames(z)<-c(sort.pops.phase2$latitude)
+cors.corr.outliers<-cbind(x,z,test=rep("cors.corr", times=nrow(x)))
+
+#cors rand
+out<- all.sigs[all.sigs$cors.rand < .0001, c(1,2)]
+x <- phase2.all.freqs[phase2.all.freqs$id %in% paste(out[,1],out[,2]),c(1:23)]
+z<-data.frame()
+for (i in 1:nrow(x)){z<-rbind(z,sort.pops.phase2$random)}
+colnames(z)<-c(sort.pops.phase2$latitude)
+cors.rand.outliers<-cbind(x,z,test=rep("cors.rand", times=nrow(x)))
+
 #combine all the dataframes
 full.2<-rbind(lfmm.hum.outliers,lfmm.prec.outliers,lfmm.temp.outliers,lfmm.rand.outliers,lfmm.corr.outliers,
               baye.hum.outliers,baye.prec.outliers,baye.temp.outliers,baye.rand.outliers,baye.corr.outliers,
-              vim.hum.outliers,vim.prec.outliers,vim.temp.outliers,vim.rand.outliers,vim.corr.outliers)
+              vim.hum.outliers,vim.prec.outliers,vim.temp.outliers,vim.rand.outliers,vim.corr.outliers,
+              cors.hum.outliers,cors.prec.outliers,cors.temp.outliers,cors.rand.outliers,cors.corr.outliers)
 ```
 
 #calculate correlation coefficient for phase 2 data
@@ -382,77 +464,144 @@ vetted<-data.frame(chrom=hom.full$chrom,
 #because we expect our random variable (random between phases 1 and 2) to inflate the overall false positive rate,
 #calculate false positive rate for only the real environmental variables
 vet<-vetted[vetted$test != "lfmm.rand" & vetted$test != "baye.rand" & vetted$test != "vim.rand"
-            & vetted$test != "lfmm.corr" & vetted$test != "baye.corr" & vetted$test != "vim.corr",]
+            & vetted$test != "lfmm.corr" & vetted$test != "baye.corr" & vetted$test != "vim.corr"
+            & vetted$test != "cors.rand" & vetted$test != "cors.corr",]
 1-sum(vet$pass.direction.test == TRUE & vet$pass.strength.test == TRUE)/nrow(vet) #total tested SNPs
 
 #lfmm calculate number of successfully vetted SNPs and the false positive rate for each test
 #lfmm hum
+sum(vetted$test == "lfmm.hum") #total SNPs
 sum(vetted$test == "lfmm.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "lfmm.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "lfmm.hum") #false positive rate
 
 #lfmm prec
+sum(vetted$test == "lfmm.prec") #total SNPs
 sum(vetted$test == "lfmm.prec" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "lfmm.prec" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "lfmm.prec") #false positive rate
 
 #lfmm temp
+sum(vetted$test == "lfmm.temp") #total SNPs
 sum(vetted$test == "lfmm.temp" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "lfmm.temp" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "lfmm.temp") #false positive rate
 
 #lfmm rand
+sum(vetted$test == "lfmm.rand") #total SNPs
 sum(vetted$test == "lfmm.rand" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "lfmm.rand" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "lfmm.rand") #false positive rate
 
 #lfmm corr
+sum(vetted$test == "lfmm.corr") #total SNPs
 sum(vetted$test == "lfmm.corr" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "lfmm.corr" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "lfmm.corr") #false positive rate
 
 #baye calculate number of successfully vetted SNPs and the false positive rate for each test
 #baye hum
+sum(vetted$test == "baye.hum") #total SNPs
 sum(vetted$test == "baye.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "baye.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "baye.hum") #false positive rate
 
 #baye prec
+sum(vetted$test == "baye.prec") #total SNPs
 sum(vetted$test == "baye.prec" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "baye.prec" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "baye.prec") #false positive rate
 
 #baye temp
+sum(vetted$test == "baye.temp") #total SNPs
 sum(vetted$test == "baye.temp" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "baye.temp" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "baye.temp") #false positive rate
 
 #baye rand
+sum(vetted$test == "baye.rand") #total SNPs
 sum(vetted$test == "baye.rand" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "baye.rand" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "baye.rand") #false positive rate
 
 #baye corr
+sum(vetted$test == "baye.corr") #total SNPs
 sum(vetted$test == "baye.corr" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "baye.corr" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "baye.corr") #false positive rate
 
 
 #vim calculate number of successfully vetted SNPs and the false positive rate for each test
 #vim hum
+sum(vetted$test == "vim.hum") #total SNPs
 sum(vetted$test == "vim.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "vim.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "vim.hum") #false positive rate
 
 #vim prec
+sum(vetted$test == "vim.prec") #total SNPs
 sum(vetted$test == "vim.prec" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "vim.prec" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "vim.prec") #false positive rate
 
 #vim temp
+sum(vetted$test == "vim.temp") #total SNPs
 sum(vetted$test == "vim.temp" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "vim.temp" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "vim.temp") #false positive rate
 
 #vim rand
+sum(vetted$test == "vim.rand") #total SNPs
 sum(vetted$test == "vim.rand" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "vim.rand" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "vim.rand") #false positive rate
 
 #vim corr
+sum(vetted$test == "vim.corr") #total SNPs
 sum(vetted$test == "vim.corr" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
 1-sum(vetted$test == "vim.corr" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "vim.corr") #false positive rate
+
+#cors calculate number of successfully vetted SNPs and the false positive rate for each test
+#cors hum
+sum(vetted$test == "cors.hum") #total SNPs
+sum(vetted$test == "cors.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
+1-sum(vetted$test == "cors.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "cors.hum") #false positive rate
+
+#cors prec
+sum(vetted$test == "cors.prec") #total SNPs
+sum(vetted$test == "cors.prec" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
+1-sum(vetted$test == "cors.prec" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "cors.prec") #false positive rate
+
+#cors temp
+sum(vetted$test == "cors.temp") #total SNPs
+sum(vetted$test == "cors.temp" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
+1-sum(vetted$test == "cors.temp" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "cors.temp") #false positive rate
+
+#cors rand
+sum(vetted$test == "cors.rand") #total SNPs
+sum(vetted$test == "cors.rand" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
+1-sum(vetted$test == "cors.rand" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "cors.rand") #false positive rate
+
+#cors corr
+sum(vetted$test == "cors.corr") #total SNPs
+sum(vetted$test == "cors.corr" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE) #nSNPs
+1-sum(vetted$test == "cors.corr" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE)/sum(vetted$test == "cors.corr") #false positive rate
 
 #add column saying whether passed both
 vetted$vet<-vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE
 vetted$vet[vetted$vet == TRUE]<-"pass"
 vetted$vet[vetted$vet == FALSE]<-"fail"
+
+#write out vetted outlier dataset
+write.csv(vetted, "~/Desktop/anoph.phase2/vetted.outliers.csv", row.names = F, quote=F)
+
+#write out each vetted SNP dataset
+write.csv(vetted[vetted$test == "lfmm.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/lfmm.hum.vetted.snps.csv" , quote=F, row.names = F) #nSNPs
+write.csv(vetted[vetted$test == "lfmm.prec" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/lfmm.prec.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "lfmm.temp" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/lfmm.temp.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "lfmm.rand" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/lfmm.rand.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "lfmm.corr" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/lfmm.corr.vetted.snps.csv", quote=F, row.names = F) #nSNPs
+write.csv(vetted[vetted$test == "baye.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/baye.hum.vetted.snps.csv", quote=F, row.names = F) #nSNPs
+write.csv(vetted[vetted$test == "baye.prec" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/baye.prec.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "baye.temp" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/baye.temp.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "baye.rand" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/baye.rand.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "baye.corr" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/baye.corr.vetted.snps.csv", quote=F, row.names = F) #nSNPs
+write.csv(vetted[vetted$test == "vim.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/vim.hum.vetted.snps.csv", quote=F, row.names = F)#nSNPs
+write.csv(vetted[vetted$test == "vim.prec" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/vim.prec.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "vim.temp" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/vim.temp.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "vim.rand" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/vim.rand.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "vim.corr" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/vim.corr.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "cors.hum" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/cors.hum.vetted.snps.csv", quote=F, row.names = F) #nSNPs
+write.csv(vetted[vetted$test == "cors.prec" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/cors.prec.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "cors.temp" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/cors.temp.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "cors.rand" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/cors.rand.vetted.snps.csv", quote=F, row.names = F) #nSNPs,]
+write.csv(vetted[vetted$test == "cors.corr" & vetted$pass.direction.test == TRUE & vetted$pass.strength.test == TRUE,], "~/Downloads/vet.output/cors.corr.vetted.snps.csv", quote=F, row.names = F) #nSNPs
 
 ```
 
