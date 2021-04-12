@@ -1,4 +1,4 @@
-All 15 candidate gene datasets presented here.
+All 20 candidate gene datasets presented here.
 
 File structure is tidy format: chromosome *space* position (i.e. base pair) *space* associated gene (within 1Kb)
 
