@@ -11,6 +11,7 @@ library(StAMPP)
 library(ggplot2)
 library(adegenet)
 library(vcfR)
+library(gridExtra)
 
 #read in all significance values
 all.sigs<-read.csv("~/Downloads/all.sigs.csv")
@@ -72,18 +73,24 @@ out[12]<-sum(all.sigs$vim.hum > 1)
 out[13]<-sum(all.sigs$vim.temp > 1)
 out[14]<-sum(all.sigs$vim.rand > 1)
 out[15]<-sum(all.sigs$vim.corr > 1)
+out[16]<-sum(all.sigs$cors.prec < .0001)
+out[17]<-sum(all.sigs$cors.hum <.0001)
+out[18]<-sum(all.sigs$cors.temp <.0001)
+out[19]<-sum(all.sigs$cors.rand <.0001)
+out[20]<-sum(all.sigs$cors.corr <.0001)
+
 
 #make dataframe for plotting
 spatial.autocorr<-c(mantel.prec$statistic,mantel.hum$statistic,mantel.temp$statistic,mantel.rand$statistic,mantel.corr$statistic)
-spatial.autocorr<-c(spatial.autocorr,spatial.autocorr,spatial.autocorr)
+spatial.autocorr<-rep(spatial.autocorr, times=4)
 spatial.autocorr<-abs(spatial.autocorr)
-cors<-data.frame(env.var=rep(c("prec","hum","temp","rand","corr"), times=3),
-                 test=c(rep("LFMM2", times=5), rep("BayeScEnv", times=5), rep("r2VIM", times=5)),
+cors<-data.frame(env.var=rep(c("prec","hum","temp","rand","corr"), times=4),
+                 test=c(rep("LFMM2", times=5), rep("BayeScEnv", times=5), rep("r2VIM", times=5),rep("rep. correlations", times=5)),
                  spat.autocorr=spatial.autocorr,
                  num.sig.outliers=out)
 
 #plot 4A
-ggplot(cors, aes(x=spat.autocorr, y=num.sig.outliers, color=test)) +
+spat.plot<-ggplot(cors, aes(x=spat.autocorr, y=num.sig.outliers, color=test)) +
   geom_point(cex=3, alpha=.6)+
   geom_smooth(method=lm, se=FALSE)+
   theme_classic()+
@@ -94,6 +101,8 @@ ggplot(cors, aes(x=spat.autocorr, y=num.sig.outliers, color=test)) +
 cor.test(cors$spat.autocorr[1:5],cors$num.sig.outliers[1:5])
 cor.test(cors$spat.autocorr[5:10],cors$num.sig.outliers[5:10])
 cor.test(cors$spat.autocorr[10:15],cors$num.sig.outliers[10:15])
+cor.test(cors$spat.autocorr[15:20],cors$num.sig.outliers[15:20])
+
 ```
 
 #analyze effect of genomic autocorrelation of environmental vairables on number of GEA outliers identified
@@ -128,11 +137,11 @@ fst.corr<-vegan::mantel(xdis = fsts, ydis = d.corr)
 
 #make vector and add to dataframe
 genetic.autocorr<-c(fst.prec$statistic,fst.hum$statistic,fst.temp$statistic,fst.rand$statistic,fst.corr$statistic)
-genetic.autocorr<-c(genetic.autocorr,genetic.autocorr,genetic.autocorr)
+genetic.autocorr<-rep(genetic.autocorr, times=4)
 cors$gen.autocorr<-abs(genetic.autocorr)
 
 #make plot 4B
-ggplot(cors, aes(x=gen.autocorr, y=num.sig.outliers, color=test)) +
+gen.autocorr.plot<-ggplot(cors, aes(x=gen.autocorr, y=num.sig.outliers, color=test)) +
   geom_point(cex=3, alpha=.6)+
   geom_smooth(method=lm, se=FALSE)+
   theme_classic()+
@@ -143,6 +152,8 @@ ggplot(cors, aes(x=gen.autocorr, y=num.sig.outliers, color=test)) +
 cor.test(cors$gen.autocorr[1:5],cors$num.sig.outliers[1:5])
 cor.test(cors$gen.autocorr[5:10],cors$num.sig.outliers[5:10])
 cor.test(cors$gen.autocorr[10:15],cors$num.sig.outliers[10:15])
+cor.test(cors$gen.autocorr[15:20],cors$num.sig.outliers[15:20])
+
 ```
 
 #test for significant difference in overall number of GEA outliers identified between real and randomly generated variables
@@ -150,15 +161,17 @@ cor.test(cors$gen.autocorr[10:15],cors$num.sig.outliers[10:15])
 #add the variable type to the dataframe
 cors$var.type<-c("environmental","environmental","environmental","randomly generated","randomly generated",
                  "environmental","environmental","environmental","randomly generated","randomly generated",
+                 "environmental","environmental","environmental","randomly generated","randomly generated",
                  "environmental","environmental","environmental","randomly generated","randomly generated")
 
 #4D
-ggplot(cors, aes(x=var.type, y=num.sig.outliers)) + 
+t.test.plot<-ggplot(cors, aes(x=var.type, y=num.sig.outliers, col=var.type)) + 
   geom_boxplot()+
   geom_jitter(position=position_jitter(0), cex=2, alpha=.6)+
+  scale_color_manual(values=c("black","black"))+
   theme_classic()+
 labs(x="GEA independent variable", y="significant GEA SNPs")
-ggsave("~/Downloads/env.random.comparison.pdf", height=3, width=4.25)
+#ggsave("~/Downloads/env.random.comparison.pdf", height=3, width=4.25)
 
 #t test to assess whether we see a significant difference in total number of outliers identified between real and fake variables
 t.test(cors$num.sig.outliers[cors$var.type == "environmental"], cors$num.sig.outliers[cors$var.type == "randomly generated"])
@@ -543,15 +556,15 @@ storer[20]<-r$statistic
 #dev.off()
 ```
 
-#calculate proportion of tested SNPs in each genomic region identified as significant for each GEA test (3 methods x 4 genomic regions x 5 environmental vairables = 60 data points)
+#calculate proportion of tested SNPs in each genomic region identified as significant for each GEA test (4 methods x 4 genomic regions x 5 environmental vairables = 80 data points)
 ```{r}
 #create dataframe to hold comparisons between significant percentage and degree of confounding genetic variation
-f<-data.frame(test=rep(test, times=3),
-              r=rep(storer, times=3))
+f<-data.frame(test=rep(test, times=4),
+              r=rep(storer, times=4))
 
 #create vector to hold the significant proportion for each of the tests in each of the genomic regions
 prop.sig<-c()
-test<-c(rep("LFMM2", times=20),rep("BayeScEnv", times=20),rep("r2VIM", times=20))
+test<-c(rep("LFMM2", times=20),rep("BayeScEnv", times=20),rep("r2VIM", times=20),rep("rep. correlations", times=20))
 #calc sig prop for each test
 sigs.2Rb<-all.sigs[all.sigs$Chromosome == "2R" & all.sigs$Position > 20524058 & all.sigs$Position < 42165532,]
 sigs.2La<-all.sigs[all.sigs$Chromosome == "2L" & all.sigs$Position > 19023925 & all.sigs$Position < 26758676,]
@@ -624,23 +637,54 @@ prop.sig[58]<-sum(sigs.species$vim.temp > 1)/nrow(sigs.species)
 prop.sig[59]<-sum(sigs.species$vim.corr > 1)/nrow(sigs.species)
 prop.sig[60]<-sum(sigs.species$vim.rand > 1)/nrow(sigs.species)
 
+#cors test 2Rb, 2La, geog, species
+prop.sig[61]<-sum(sigs.2Rb$cors.prec < .0001)/nrow(sigs.2Rb)
+prop.sig[62]<-sum(sigs.2Rb$cors.hum < .0001)/nrow(sigs.2Rb)
+prop.sig[63]<-sum(sigs.2Rb$cors.temp < .0001)/nrow(sigs.2Rb)
+prop.sig[64]<-sum(sigs.2Rb$cors.corr < .0001)/nrow(sigs.2Rb)
+prop.sig[65]<-sum(sigs.2Rb$cors.rand < .0001)/nrow(sigs.2Rb)
+prop.sig[66]<-sum(sigs.2La$cors.prec < .0001)/nrow(sigs.2La)
+prop.sig[67]<-sum(sigs.2La$cors.hum < .0001)/nrow(sigs.2La)
+prop.sig[68]<-sum(sigs.2La$cors.temp < .0001)/nrow(sigs.2La)
+prop.sig[69]<-sum(sigs.2La$cors.corr < .0001)/nrow(sigs.2La)
+prop.sig[70]<-sum(sigs.2La$cors.rand < .0001)/nrow(sigs.2La)
+prop.sig[71]<-sum(sigs.geog$cors.prec < .0001)/nrow(sigs.geog)
+prop.sig[72]<-sum(sigs.geog$cors.hum < .0001)/nrow(sigs.geog)
+prop.sig[73]<-sum(sigs.geog$cors.temp < .0001)/nrow(sigs.geog)
+prop.sig[74]<-sum(sigs.geog$cors.corr < .0001)/nrow(sigs.geog)
+prop.sig[75]<-sum(sigs.geog$cors.rand < .0001)/nrow(sigs.geog)
+prop.sig[76]<-sum(sigs.species$cors.prec < .0001)/nrow(sigs.species)
+prop.sig[77]<-sum(sigs.species$cors.hum < .0001)/nrow(sigs.species)
+prop.sig[78]<-sum(sigs.species$cors.temp < .0001)/nrow(sigs.species)
+prop.sig[79]<-sum(sigs.species$cors.corr < .0001)/nrow(sigs.species)
+prop.sig[80]<-sum(sigs.species$cors.rand < .0001)/nrow(sigs.species)
+
 #add to dataframe
 f$comps<-test
 f$prop.sig<-prop.sig
 
 #plot the resulting relationship
 #4C
-ggplot(f, aes(x=abs(r), y=prop.sig, color=comps)) + 
+gen.regions.plot<-ggplot(f, aes(x=abs(r), y=prop.sig, color=comps)) + 
   geom_point(cex=3, alpha=.6)+
   geom_smooth(method=lm, se=FALSE)+
   theme_classic()+
   labs(x="correlation between genetic and environmental divergence \n for a given region of genomic relatedness",
        y="proportion of significant GEA SNPs")
-ggsave("~/Downloads/corr.snps.genomic.regions.pdf", height=3, width=5.5)
+#ggsave("~/Downloads/corr.snps.genomic.regions.pdf", height=3, width=5.5)
 
 #test significance of each correlation
 cor.test(f$r[1:20],f$prop.sig[1:20])
 cor.test(f$r[20:40],f$prop.sig[20:40])
 cor.test(f$r[40:60],f$prop.sig[40:60])
+cor.test(f$r[60:80],f$prop.sig[60:80])
+
+
+h <- arrangeGrob(spat.plot, gen.autocorr.plot, gen.regions.plot, t.test.plot, nrow = 2)
+
+ggsave(h, filename="~/Desktop/anoph.phase2/corr.plots.pdf", width = 10, height = 6, units ="in")
+
+
+
 ```
 
