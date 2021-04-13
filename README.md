@@ -1,7 +1,7 @@
 *Anopheles* Genome Environment Associations 
 ==================================================================================
 
-This repository contains a comprehensive compilation of code and expalantory visualization associated with the paper: Genome-environment Associations Reveal Omnigenic Adaptation to Ecological Niche Across the Distribution of Anopheles gambiae
+This repository contains a comprehensive compilation of code and expalantory visualization associated with the paper: Genome-environment Association Methods Comparison Indicates Omnigenic Adaptation to Ecological Niche in Malaria Vector Mosquitoes
 
 Visualizations of processes described in the paper
 ------------
@@ -31,6 +31,9 @@ Visualizations of processes described in the paper
 *   This process can be viewed and reproduced from this markdown:
     > <https://devonderaad.github.io/Anopheles/xxx.html>
 
-
+Access candidate gene datasets
+------------
+*   All 20 candidate gene and outlier SNP datasets generated here can be directly accessed by following:
+    > <https://github.com/DevonDeRaad/Anopheles/tree/master/candidate.gene.datasets>
 
 
