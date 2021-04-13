@@ -16,7 +16,7 @@ Visualizations of processes described in the paper
 
 ### Perform 'repeated correlations' simple, intuitive GEA testing approach
 *   Perform each correlation, store relevant values, explore significance cutoffs:
-    > <https://devonderaad.github.io/Anopheles/xxx>
+    > <https://devonderaad.github.io/Anopheles/run.repeated.correlations/repeated.correlations.testing.html>
 
 ### Vetting process using allele frequency patterns from independent genetic sampling efforts
 *   Entire process can be viewed here, including visualizations of the resulting classifications showing intuitive usefulness of this process:
