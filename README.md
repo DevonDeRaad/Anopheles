@@ -14,6 +14,9 @@ Visualizations of processes described in the paper
 *   Example for humidity ~ chromosome 2L:
     > <https://devonderaad.github.io/Anopheles/r2vim/optimize.mtry/hum.2L.r2vim.optimize.html>
 
+### Perform 'repeated correlations' simple, intuitive GEA testing approach
+*   Perform each correlation, store relevant values, explore significance cutoffs:
+    > <https://devonderaad.github.io/Anopheles/xxx>
 
 ### Vetting process using allele frequency patterns from independent genetic sampling efforts
 *   Entire process can be viewed here, including visualizations of the resulting classifications showing intuitive usefulness of this process:
@@ -23,15 +26,11 @@ Visualizations of processes described in the paper
 *   The process of calculating correlation matrices, mantel tests, and evaluating the effect on number/proportion of GEA outliers can be viewed here:
     > <https://devonderaad.github.io/Anopheles/test.correlations/test.corrs.html>
 
-### walkthrough on matching outlier SNPs to genes, testing for overrepresentation of GO terms, and searching for gene information
+### Identify sets of genes associated with each outlier SNP dataset, and test for significant overrepresentation of the a priori identified desiccation-tolerance candidate genes from Ayala et al. (2019)
 
-*   For the LFMM humidity dataset:
-    > <https://devonderaad.github.io/Anopheles/humidity.gene.searching.html>
+*   This process can be viewed and reproduced from this markdown:
+    > <https://devonderaad.github.io/Anopheles/xxx.html>
 
-*   For the LFMM precipitation dataset:
-    > <https://devonderaad.github.io/Anopheles/prec.gene.searching.html>
 
-*   For the LFMM temperature dataset:
-    > <https://devonderaad.github.io/Anopheles/temp.gene.searching.html>
 
 
