@@ -29,7 +29,7 @@ Visualizations of processes described in the paper
 ### Identify sets of genes associated with each outlier SNP dataset, and test for significant overrepresentation of the a priori identified desiccation-tolerance candidate genes from Ayala et al. (2019)
 
 *   This process can be viewed and reproduced from this markdown:
-    > <https://devonderaad.github.io/Anopheles/xxx.html>
+    > <https://devonderaad.github.io/Anopheles/gene.association/gene.matching.ayala.overrep.testing.html>
 
 Access candidate gene datasets
 ------------
