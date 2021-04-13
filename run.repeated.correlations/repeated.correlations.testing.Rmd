@@ -1,0 +1,122 @@
+---
+title: "Repeated correlations testing"
+author: "Devon DeRaad"
+date: "4/13/2021"
+output: html_document
+---
+
+```{r}
+library(qvalue)
+#bring in allele frequency data
+phase1.all.freqs<-read.csv(file = "~/Desktop/anoph.phase2/phase1.all.freqs.csv")
+#make column for id
+phase1.all.freqs$id<-paste(phase1.all.freqs$chrom,phase1.all.freqs$POS)
+#bring in dataframe with locality and environmental data for each individual phase1
+phase1.alldata<-read.csv(file = "~/Downloads/phase1_all_vairables_last.csv")
+#subset to only the variables we need (lat,long,hum,temp,precip)
+meta<-phase1.alldata[,c("latitude","longitude","p_annual","t_mean","h_mean","autocorrelated","random")]
+#subset only the unique lat/longs
+metapops<-unique(meta)
+#sort by latitude to match the order of the allele frequency files
+sort.pops.phase1 <-metapops[order(metapops$latitude),]
+```
+
+```{r}
+#perform 945K correlation tests (one for each allele freauency pattern) for association with humidity
+rs.hum<-c()
+for (i in 1:nrow(phase1.all.freqs)){
+  a<-cor.test(sort.pops.phase1$h_mean, as.numeric(as.vector(phase1.all.freqs[i,c(3:16)])))
+  rs.hum[i]<-a$p.value
+}
+
+#test association with precipitation
+rs.prec<-c()
+for (i in 1:nrow(phase1.all.freqs)){
+  a<-cor.test(sort.pops.phase1$p_annual, as.numeric(as.vector(phase1.all.freqs[i,c(3:16)])))
+rs.prec[i]<-a$p.value
+}
+
+#test association with temperature
+rs.temp<-c()
+for (i in 1:nrow(phase1.all.freqs)){
+  a<-cor.test(sort.pops.phase1$t_mean, as.numeric(as.vector(phase1.all.freqs[i,c(3:16)])))
+rs.temp[i]<-a$p.value
+}
+
+#test association with random spatially autocorrelated variable
+rs.corr<-c()
+for (i in 1:nrow(phase1.all.freqs)){
+  a<-cor.test(sort.pops.phase1$autocorrelated, as.numeric(as.vector(phase1.all.freqs[i,c(3:16)])))
+rs.corr[i]<-a$p.value
+}
+
+#test association with random variable
+rs.rand<-c()
+for (i in 1:nrow(phase1.all.freqs)){
+  a<-cor.test(sort.pops.phase1$random, as.numeric(as.vector(phase1.all.freqs[i,c(3:16)])))
+rs.rand[i]<-a$p.value
+}
+
+#combine the p value for each SNP for each test into a single dataframe
+dff<-data.frame(chrom=phase1.all.freqs$chrom,
+               pos=phase1.all.freqs$POS,
+               hum=rs.hum,
+               prec=rs.prec,
+               temp=rs.temp,
+               corr=rs.corr,
+               rand=rs.rand)
+
+#save this dataframe
+#write.csv(dff, "~/Desktop/anoph.phase2/repeated.corrs.csv", row.names = F, quote=F)
+```
+
+#Investigate potential significance thresholds
+```{r}
+#convert each p value to a qvalue and check the distribution
+hist(qvalue(dff$hum))
+hist(qvalue(dff$prec))
+hist(qvalue(dff$temp))
+hist(qvalue(dff$rand))
+hist(qvalue(dff$corr))
+
+#because q value conversion causes some of the tests to fall completely above .05, we will just go with a reasonable p value cutoff
+
+#test .05
+table(dff$hum < .05)
+table(dff$prec < .05)
+table(dff$temp < .05)
+table(dff$rand < .05)
+table(dff$corr < .05)
+
+#test .01
+table(dff$hum < .01)
+table(dff$prec < .01)
+table(dff$temp < .01)
+table(dff$rand < .01)
+table(dff$corr < .01)
+
+#test .001
+table(dff$hum < .001)
+table(dff$prec < .001)
+table(dff$temp < .001)
+table(dff$rand < .001)
+table(dff$corr < .001)
+
+#test .0001
+table(dff$hum < .0001)
+table(dff$prec < .0001)
+table(dff$temp < .0001)
+table(dff$rand < .0001)
+table(dff$corr < .0001)
+
+#test .00001
+table(dff$hum < .00001)
+table(dff$prec < .00001)
+table(dff$temp < .00001)
+table(dff$rand < .00001)
+table(dff$corr < .00001)
+
+#.0001 seems like goldilocks zone that gives a reasonable number of outliers
+
+```
+
