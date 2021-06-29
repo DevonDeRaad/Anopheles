@@ -7,6 +7,7 @@
 
 # packages
 library(raster)
+library(rgeos)
 library(maps)
 
 # function for legend
@@ -80,7 +81,7 @@ buff_areap <- spTransform(buff_area, WGS84)
 
 
 ## colors
-colp <- rev(viridis::viridis(255))
+colp <- viridis::viridis(255)
 colbf <- "#E31616"
 
 
@@ -98,7 +99,7 @@ layout(matrix(matn, ncol = 4, byrow = T), widths = rep(4, 4),
 ## legend
 par(cex = 0.8, mar = rep(0, 4))
 plot.new()
-bar_legend(value_range = c("Low", "High"), col = colp, 
+bar_legend(value_range = c("Low", "High"), col = rev(colp), 
            label_x = c(0.055, 0.65), labels_y = 0.3, 
            legend_coord = c(0.075, 0.4, 0.625, 0.8), 
            horizontal = TRUE)
